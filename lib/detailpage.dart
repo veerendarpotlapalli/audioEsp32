@@ -184,7 +184,6 @@ class _DetailPageState extends State<DetailPage> {
                       print("onTap item");
                       if (_file.path == selectedFilePath) {
                         print("++++++++++++++++++@@@@@@@@@@@*******************************${_file.path}");
-                        await player.startPlayer(fromURI:'/data/user/0/com.example.vsaudio/app_flutter/2023-03-16_09_37_46.wav');
 
                         // await player.stop();
                         selectedFilePath = '';
@@ -194,7 +193,7 @@ class _DetailPageState extends State<DetailPage> {
                       if (await File(_file.path).exists()) {
                         selectedFilePath = _file.path;
                         print("*****************************************${_file.path}");
-                        await player.startPlayer(fromURI:'/data/user/0/com.example.vsaudio/app_flutter/2023-03-16_09_37_46.wav');
+                        await player.startPlayer(fromURI: _file.path);
                         print("*****************************************${_file.path}");
 
                       } else {
