@@ -131,8 +131,9 @@ class _DetailPageState extends State<DetailPage> {
   void _sendMessage(String text) async {
     text = text.trim();
     if (text.length > 0) {
+
       try {
-        List<int> list = text.codeUnits;
+        List<int> list = utf8.encode(text);
         Uint8List bytes = Uint8List.fromList(list);
         connection!.output.add(bytes);
         await connection!.output.allSent;
@@ -308,8 +309,8 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   Future<String> get _localPath async {
-    final directory = await getApplicationDocumentsDirectory();
-    return directory.path;
+    final directory = await getExternalStorageDirectory();
+    return directory!.path;
   }
 
   Future<File> get _makeNewFile async {
