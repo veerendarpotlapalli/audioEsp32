@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:audio_waveforms/audio_waveforms.dart';
 import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:vsaudio/file_entity_list_tile.dart';
@@ -49,7 +50,9 @@ class _DetailPageState extends State<DetailPage> {
 
   List<FileSystemEntity> files = <FileSystemEntity>[];
   String? selectedFilePath;
-  final player = FlutterSoundPlayer();
+  // final player = FlutterSoundPlayer();
+
+  final controller = PlayerController();
 
 
   @override
@@ -186,7 +189,7 @@ class _DetailPageState extends State<DetailPage> {
                       if (_file.path == selectedFilePath) {
                         print("++++++++++++++++++@@@@@@@@@@@*******************************${_file.path}");
 
-                        // await player.stop();
+                        await controller.stopPlayer();
                         selectedFilePath = '';
                         return;
                       }
@@ -194,7 +197,13 @@ class _DetailPageState extends State<DetailPage> {
                       if (await File(_file.path).exists()) {
                         selectedFilePath = _file.path;
                         print("*****************************************${_file.path}");
-                        await player.startPlayer(fromURI: _file.path);
+                        await controller.preparePlayer(
+                            path:_file.path,
+                            shouldExtractWaveform: true,
+                            noOfSamples: 100,
+                            volume: 1.0,
+                        );
+                        controller.startPlayer(finishMode: FinishMode.loop);
                         print("*****************************************${_file.path}");
 
                       } else {

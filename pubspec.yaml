@@ -54,7 +54,7 @@ dependencies:
   dio: ^5.0.2
   permission_handler: ^10.2.0
   image_gallery_saver: ^1.7.1
-
+  audio_waveforms: ^1.0.3
 
 dev_dependencies:
   flutter_test:
