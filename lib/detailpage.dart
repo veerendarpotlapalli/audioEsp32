@@ -3,7 +3,11 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
+
+// import 'package:flutter_blue/flutter_blue.dart';
 import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
+// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+
 import 'package:flutter_sound/public/flutter_sound_player.dart';
 import 'package:vsaudio/file_entity_list_tile.dart';
 import 'package:vsaudio/wav_header.dart';
@@ -14,7 +18,6 @@ import 'package:just_audio/just_audio.dart';
 // import 'package:audioplayers/audioplayers.dart';
 // import 'package:fileaudioplayer/fileaudioplayer.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
@@ -219,9 +222,9 @@ class _DetailPageState extends State<DetailPage> {
             ],
           )
               : Center(
-            child: Text(
-              "Connecting...",
-              style: TextStyle(
+                child: Text(
+                  "Connecting...",
+                  style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
