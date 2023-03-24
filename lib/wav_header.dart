@@ -56,19 +56,19 @@ class WavHeader {
     }
 
     var byteRate = ByteData(4);
-    byteRate.setUint32(0, 88200, Endian.little);
+    byteRate.setUint32(0, 176400, Endian.little);
     for (int i = 0; i < 4; i++) {
       byte.add(byteRate.getUint8(i));
     }
 
     var blockAlign = ByteData(2);
-    blockAlign.setUint16(0, 2, Endian.little);
+    blockAlign.setUint16(0, 3, Endian.little);
     for (int i = 0; i < 2; i++) {
       byte.add(blockAlign.getUint8(i));
     }
 
     var bitsPerSample = ByteData(2);
-    bitsPerSample.setUint16(0, 16, Endian.little);
+    bitsPerSample.setUint16(0, 32, Endian.little);
     for (int i = 0; i < 2; i++) {
       byte.add(bitsPerSample.getUint8(i));
     }

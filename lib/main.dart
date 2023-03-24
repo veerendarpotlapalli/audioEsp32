@@ -1,8 +1,8 @@
-import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:vsaudio/BluetoothDeviceListEntry.dart';
+// import 'demodetail.dart';
 import 'detailpage.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 void main() {
   runApp(MyApp());
 }

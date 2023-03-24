@@ -3,14 +3,9 @@ import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:audio_waveforms/audio_waveforms.dart';
-
-// import 'package:flutter_blue/flutter_blue.dart';
-import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
-// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
-
+import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'package:flutter_sound/flutter_sound.dart';
 import 'package:flutter_sound/public/flutter_sound_player.dart';
-import 'package:vsaudio/file_entity_list_tile.dart';
-import 'package:vsaudio/wav_header.dart';
 import 'package:async/async.dart';
 
 import 'package:just_audio/just_audio.dart';
@@ -18,12 +13,16 @@ import 'package:just_audio/just_audio.dart';
 // import 'package:audioplayers/audioplayers.dart';
 // import 'package:fileaudioplayer/fileaudioplayer.dart';
 import 'package:flutter/material.dart';
+// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 // import 'package:slide_popup_dialog/slide_popup_dialog.dart';
 
 import 'package:slide_popup_dialog_null_safety/slide_popup_dialog.dart' as slideDialog;
+import 'package:vsaudio/wav_header.dart';
+
+import 'file_entity_list_tile.dart';
 
 enum RecordState { stopped, recording }
 
@@ -46,33 +45,45 @@ class _DetailPageState extends State<DetailPage> {
   List<List<int>> chunks = <List<int>>[];
   int contentLength = 0;
   Uint8List? _bytes;
+  PlayerController controller = PlayerController();// Initialise
 
   RestartableTimer? _timer;
   RecordState _recordState = RecordState.stopped;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
+  Uint8List? dataStream;
 
   List<FileSystemEntity> files = <FileSystemEntity>[];
   String? selectedFilePath;
-  // final player = FlutterSoundPlayer();
-
-  final controller = PlayerController();
+  final player = FlutterSoundPlayer();
+  final streamPlayer=FlutterSoundPlayer();
 
 
   @override
   void initState() {
     super.initState();
+    player.openPlayer();
+    streamPlayer.openPlayer();
     _getBTConnection();
-    _timer = new RestartableTimer(Duration(seconds: 1), _completeByte);
+    _timer = RestartableTimer(const Duration(seconds: 1), _completeByte);
     _listofFiles();
     selectedFilePath = '';
+    initStreamPlayer();
   }
-
+  void initStreamPlayer()async{
+    await streamPlayer.startPlayerFromStream(
+        codec: Codec.pcm16,
+        numChannels: 1,
+        sampleRate: 44100
+    );
+    streamPlayer.setVolume(1.0);
+  }
   @override
   void dispose() {
     if (isConnected) {
       isDisconnecting = true;
       connection!.dispose();
       connection = null;
+
     }
     _timer!.cancel();
     super.dispose();
@@ -80,11 +91,13 @@ class _DetailPageState extends State<DetailPage> {
 
   _getBTConnection() {
     BluetoothConnection.toAddress(widget.server!.address).then((_connection) {
-      connection = _connection;
+      setState(() {
+        connection = _connection;
+      });
       isConnecting = false;
       isDisconnecting = false;
       setState(() {});
-      connection!.input!.listen(_onDataReceived).onDone(() {
+      _connection.input!.listen(_onDataReceived).onDone(() {
         if (isDisconnecting) {
           print('Disconnecting locally');
         } else {
@@ -101,18 +114,21 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   _completeByte() async {
-    if (chunks.length == 0 || contentLength == 0) return;
+    if (chunks.isEmpty || contentLength == 0) return;
     SVProgressHUD.dismiss();
     print("CompleteByte length : $contentLength");
     _bytes = Uint8List(contentLength);
     int offset = 0;
     for (final List<int> chunk in chunks) {
+      // streamPlayer.feedFromStream(Unit8List.fromList(chunk));
       _bytes!.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
     }
-
     final file = await _makeNewFile;
     var headerList = WavHeader.createWavHeader(contentLength);
+    setState(() {
+      print("${headerList.length}***********");
+    });
     file.writeAsBytesSync(headerList, mode: FileMode.write);
     file.writeAsBytesSync(_bytes!, mode: FileMode.append);
 
@@ -124,23 +140,27 @@ class _DetailPageState extends State<DetailPage> {
     chunks.clear();
   }
 
-  void _onDataReceived(Uint8List data) {
-    if (data != null && data.length > 0) {
+  void _onDataReceived(Uint8List data) async {
+    if (data.isNotEmpty) {
       chunks.add(data);
-      contentLength += data.length;
-      _timer!.reset();
+      streamPlayer.foodSink!.add(FoodData(data));
+      setState(() {
+        // dataStream=data;
+        contentLength += data.length;
+        _timer!.reset();
+      });
     }
 
-    print("Data Length: ${data.length}, chunks: ${chunks.length}");
+    print("Content Length: ${contentLength}, chunks: ${chunks.length}");
   }
 
   void _sendMessage(String text) async {
     text = text.trim();
     if (text.length > 0) {
-
       try {
         List<int> list = utf8.encode(text);
         Uint8List bytes = Uint8List.fromList(list);
+
         connection!.output.add(bytes);
         await connection!.output.allSent;
 
@@ -182,36 +202,33 @@ class _DetailPageState extends State<DetailPage> {
                       print("onLongPress item");
                       if (await File(_file.path).exists()) {
                         File(_file.path).deleteSync();
-
                         files.remove(_file);
                         setState(() {});
                       }
                     },
                     onTap: () async {
                       print("onTap item");
+                      player.startPlayer(fromURI: _file.path);
                       if (_file.path == selectedFilePath) {
-                        print("++++++++++++++++++@@@@@@@@@@@*******************************${_file.path}");
-
-                        await controller.stopPlayer();
+                        print("++++++++++++++++++@@@@@@@@@@@***********${_file.path}");
+                        await player.stopPlayer();
                         selectedFilePath = '';
                         return;
                       }
 
                       if (await File(_file.path).exists()) {
                         selectedFilePath = _file.path;
-                        print("*****************************************${_file.path}");
-                        await controller.preparePlayer(
-                            path:_file.path,
-                            shouldExtractWaveform: true,
-                            noOfSamples: 100,
-                            volume: 1.0,
-                        );
-                        controller.startPlayer(finishMode: FinishMode.loop);
-                        print("*****************************************${_file.path}");
+                        // controller.startPlayer(finishMode: FinishMode.stop);
+                        // player.startPlayer(fromURI: _file.path);
+
+                        print("***************${_file.path}");
+
+                        print("***************${_file.path}");
 
                       } else {
                         selectedFilePath = '';
                       }
+
 
                       setState(() {});
                     },
@@ -222,9 +239,9 @@ class _DetailPageState extends State<DetailPage> {
             ],
           )
               : Center(
-                child: Text(
-                  "Connecting...",
-                  style: TextStyle(
+            child: Text(
+              "Connecting...",
+              style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
                   color: Colors.white),
@@ -247,6 +264,7 @@ class _DetailPageState extends State<DetailPage> {
             )
         ),
         onPressed: () {
+          // streamPlayer.startPlayer(fromDataBuffer: dataStream,codec: Codec.pcm16);
           if (_recordState == RecordState.stopped) {
             _sendMessage("START");
             _showRecordingDialog();
@@ -258,7 +276,7 @@ class _DetailPageState extends State<DetailPage> {
           padding: const EdgeInsets.all(8.0),
           child: Text(
             _recordState == RecordState.stopped ? "RECORD" : "STOP",
-            style: TextStyle(fontSize: 24),
+            style: const TextStyle(fontSize: 24),
           ),
         ),
       ),
