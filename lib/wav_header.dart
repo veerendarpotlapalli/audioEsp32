@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-class WavHeader {
+class WavHeader{
   static Uint8List toBytes(String str) {
     var encoder = const AsciiEncoder();
     return encoder.convert(str);
@@ -18,7 +18,7 @@ class WavHeader {
     }
 
     var chunkSize = ByteData(4);
-    int fileSize = wavSize + 44  - 8;
+    int fileSize = wavSize + 44 - 8;
     chunkSize.setUint32(0, fileSize, Endian.little);
     for (int i = 0; i < 4; i++) {
       print("ChunkSize HEX: ${chunkSize.getUint8(i).toRadixString(16)}");
@@ -56,19 +56,20 @@ class WavHeader {
     }
 
     var byteRate = ByteData(4);
-    byteRate.setUint32(0, 176400, Endian.little);
+    byteRate.setUint32(0,88200,Endian.little);
     for (int i = 0; i < 4; i++) {
       byte.add(byteRate.getUint8(i));
+
     }
 
     var blockAlign = ByteData(2);
-    blockAlign.setUint16(0, 3, Endian.little);
+    blockAlign.setUint16(0, 2, Endian.little);
     for (int i = 0; i < 2; i++) {
       byte.add(blockAlign.getUint8(i));
     }
 
     var bitsPerSample = ByteData(2);
-    bitsPerSample.setUint16(0, 32, Endian.little);
+    bitsPerSample.setUint16(0, 16, Endian.little);
     for (int i = 0; i < 2; i++) {
       byte.add(bitsPerSample.getUint8(i));
     }

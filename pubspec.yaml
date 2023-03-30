@@ -41,11 +41,15 @@ dependencies:
   slide_popup_dialog_null_safety: ^1.0.0
   flutter_svprogresshud: ^0.0.3
   permission_handler: ^10.2.0
-  flutter_blue_plus: ^1.4.0
-  just_audio: ^0.9.31
+
   flutter_sound: ^9.2.13
-  audio_waveforms: ^1.0.3
-  flutter_bluetooth_serial: ^0.4.0
+  flutter_bluetooth_seria_changed: ^0.4.0
+
+  #  just_audio: ^0.9.31
+  #  flutter_bluetooth_serial: ^0.4.0
+#  flutter_blue_plus: ^1.4.0
+  #  audio_waveforms: ^1.0.3
+
 
 dev_dependencies:
   flutter_test:

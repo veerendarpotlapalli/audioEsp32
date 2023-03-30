@@ -2,26 +2,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:audio_waveforms/audio_waveforms.dart';
-import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_sound/flutter_sound.dart';
-import 'package:flutter_sound/public/flutter_sound_player.dart';
+import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
+
 import 'package:async/async.dart';
-
-import 'package:just_audio/just_audio.dart';
-
-// import 'package:audioplayers/audioplayers.dart';
-// import 'package:fileaudioplayer/fileaudioplayer.dart';
 import 'package:flutter/material.dart';
-// import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-// import 'package:slide_popup_dialog/slide_popup_dialog.dart';
-
 import 'package:slide_popup_dialog_null_safety/slide_popup_dialog.dart' as slideDialog;
 import 'package:vsaudio/wav_header.dart';
-
 import 'file_entity_list_tile.dart';
 
 enum RecordState { stopped, recording }
@@ -45,7 +35,7 @@ class _DetailPageState extends State<DetailPage> {
   List<List<int>> chunks = <List<int>>[];
   int contentLength = 0;
   Uint8List? _bytes;
-  PlayerController controller = PlayerController();// Initialise
+  // PlayerController controller = PlayerController();// Initialise
 
   RestartableTimer? _timer;
   RecordState _recordState = RecordState.stopped;
@@ -54,15 +44,18 @@ class _DetailPageState extends State<DetailPage> {
 
   List<FileSystemEntity> files = <FileSystemEntity>[];
   String? selectedFilePath;
-  final player = FlutterSoundPlayer();
-  final streamPlayer=FlutterSoundPlayer();
+  final player = FlutterSoundPlayer(voiceProcessing: true);
+  final streamPlayer = FlutterSoundPlayer();
+
+  // List<Uint8List> streamData=<Uint8List>[];
+
 
 
   @override
   void initState() {
     super.initState();
     player.openPlayer();
-    streamPlayer.openPlayer();
+    streamPlayer.openPlayer(enableVoiceProcessing: true);
     _getBTConnection();
     _timer = RestartableTimer(const Duration(seconds: 1), _completeByte);
     _listofFiles();
@@ -75,6 +68,8 @@ class _DetailPageState extends State<DetailPage> {
         numChannels: 1,
         sampleRate: 44100
     );
+
+    streamPlayer.setSubscriptionDuration(Duration(milliseconds: 500));
     streamPlayer.setVolume(1.0);
   }
   @override
@@ -126,6 +121,8 @@ class _DetailPageState extends State<DetailPage> {
     }
     final file = await _makeNewFile;
     var headerList = WavHeader.createWavHeader(contentLength);
+
+
     setState(() {
       print("${headerList.length}***********");
     });
@@ -143,11 +140,17 @@ class _DetailPageState extends State<DetailPage> {
   void _onDataReceived(Uint8List data) async {
     if (data.isNotEmpty) {
       chunks.add(data);
+
+      // var arr = _bytes!.buffer.asUint8List(data as int);
+
       streamPlayer.foodSink!.add(FoodData(data));
+
+
       setState(() {
-        // dataStream=data;
         contentLength += data.length;
         _timer!.reset();
+
+        // streamData.add(data);
       });
     }
 
@@ -219,7 +222,9 @@ class _DetailPageState extends State<DetailPage> {
                       if (await File(_file.path).exists()) {
                         selectedFilePath = _file.path;
                         // controller.startPlayer(finishMode: FinishMode.stop);
-                        // player.startPlayer(fromURI: _file.path);
+
+
+                        player.startPlayer(fromURI: _file.path,codec: Codec.pcm16WAV);
 
                         print("***************${_file.path}");
 
@@ -322,6 +327,13 @@ class _DetailPageState extends State<DetailPage> {
                   )
               ),
               onPressed: () {
+                //
+                // streamData.forEach((data) {
+                //   Future.delayed(const Duration(milliseconds: 800),(){
+                //     streamPlayer.foodSink!.add(FoodData(data));
+                //   });
+                // });
+
                 _sendMessage("STOP");
                 SVProgressHUD.showInfo(status: "Stopping...");
                 Navigator.of(context).pop();
