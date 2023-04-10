@@ -1,18 +1,31 @@
 // import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
+import 'package:network_info_plus/network_info_plus.dart';
 import 'package:vsaudio/BluetoothDeviceListEntry.dart';
+import 'package:vsaudio/connectToWifi.dart';
+import 'package:vsaudio/detailPageSample.dart';
 // import 'demodetail.dart';
 import 'detailpage.dart';
 import 'package:flutter/material.dart';
+
+
 void main() {
   runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
+
+final wifiName = "okay";
+
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       home: HomePage(),
+      // home: ConnectToWifi(wifiName: name),
       debugShowCheckedModeBanner: false,
     );
   }
@@ -25,6 +38,7 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   BluetoothState _bluetoothState = BluetoothState.UNKNOWN;
+
 
   List<BluetoothDevice> devices = <BluetoothDevice>[];
 
@@ -124,14 +138,15 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
             Expanded(
               child: ListView(
                 children: devices
-                    .map((_device) => BluetoothDeviceListEntry(
-                  device: _device,
-                  enabled: true,
-                  onTap: () {
-                    print("Item");
-                    _startCameraConnect(context, _device);
-                  },
-                ))
+                    .map((_device) =>
+                    BluetoothDeviceListEntry(
+                      device: _device,
+                      enabled: true,
+                      onTap: () {
+                        print("Item");
+                        _startCameraConnect(context, _device);
+                      },
+                    ))
                     .toList(),
               ),
             )
@@ -143,7 +158,8 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _startCameraConnect(BuildContext context, BluetoothDevice server) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      return DetailPage(server: server);
+      return DetailPageSample(server: server);
     }));
   }
+
 }

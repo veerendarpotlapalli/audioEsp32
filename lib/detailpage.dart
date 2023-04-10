@@ -15,6 +15,7 @@ import 'package:vsaudio/wav_header.dart';
 import 'file_entity_list_tile.dart';
 
 enum RecordState { stopped, recording }
+enum Volume {up,down}
 
 class DetailPage extends StatefulWidget {
   final BluetoothDevice? server;
@@ -26,6 +27,9 @@ class DetailPage extends StatefulWidget {
 }
 
 class _DetailPageState extends State<DetailPage> {
+
+  var num = 1;
+
   BluetoothConnection? connection;
   bool isConnecting = true;
 
@@ -39,6 +43,7 @@ class _DetailPageState extends State<DetailPage> {
 
   RestartableTimer? _timer;
   RecordState _recordState = RecordState.stopped;
+  Volume _volume = Volume.up;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
   Uint8List? dataStream;
 
@@ -171,6 +176,10 @@ class _DetailPageState extends State<DetailPage> {
           _recordState = RecordState.recording;
         } else if (text == "STOP") {
           _recordState = RecordState.stopped;
+        } else if (text == "DOWN") {
+          _volume = Volume.down;
+        } else if (text == "UP") {
+          _volume = Volume.up;
         }
         setState(() {});
       } catch (e) {
@@ -195,6 +204,59 @@ class _DetailPageState extends State<DetailPage> {
               ? Column(
             children: <Widget>[
               shotButton(),
+
+              Center(
+                child: Row(
+                  children: [
+                    SizedBox(width: 70,),
+                    Padding(
+                      padding: const EdgeInsets.all(25),
+                      child: ElevatedButton(
+                        style:ElevatedButton.styleFrom(
+                          backgroundColor: Colors.orangeAccent,shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100)),
+                          textStyle: TextStyle(color: Colors.white,fontSize: 23),
+                        ), //styleFrom
+                        onPressed: () {
+
+                          _sendMessage("DOWN");
+                          // incdec("down");
+                          // print("*****  $num  *****");
+
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Icon(Icons.volume_down_alt),
+                        ),
+                      ),
+                    ),
+
+                    Padding(
+                      padding: const EdgeInsets.all(25),
+                      child: ElevatedButton(
+                        style:ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(100)),
+                          textStyle: TextStyle(color: Colors.white,fontSize: 23),
+                        ), //styleFrom
+                        onPressed: () {
+
+                          _sendMessage("UP");
+                          // incdec("up");
+                          // print("*****  $num  *****");
+
+
+                        },
+                        child: Padding(
+                          padding: const EdgeInsets.all(5),
+                          child: Icon(Icons.volume_up),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               Expanded(
                 child: ListView(
                   children: files
@@ -264,7 +326,7 @@ class _DetailPageState extends State<DetailPage> {
             shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                 RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18.0),
-                    side: BorderSide(color: Colors.red)
+                    side: BorderSide(color: Colors.blue)
                 )
             )
         ),
@@ -314,37 +376,91 @@ class _DetailPageState extends State<DetailPage> {
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
               ),
             ),
+
             SizedBox(
               height: 100,
             ),
-            ElevatedButton(
-              style: ButtonStyle(
-                  shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.red)
-                      )
-                  )
-              ),
-              onPressed: () {
-                //
-                // streamData.forEach((data) {
-                //   Future.delayed(const Duration(milliseconds: 800),(){
-                //     streamPlayer.foodSink!.add(FoodData(data));
-                //   });
-                // });
 
-                _sendMessage("STOP");
-                SVProgressHUD.showInfo(status: "Stopping...");
-                Navigator.of(context).pop();
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8),
-                child: Text(
-                  "STOP",
-                  style: TextStyle(fontSize: 24),
+            Row(
+              children: [
+
+                SizedBox(
+                  width: 5,
                 ),
-              ),
+
+                ElevatedButton(
+                  style:ElevatedButton.styleFrom(
+                    backgroundColor: Colors.orangeAccent,shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100)),
+                    textStyle: TextStyle(color: Colors.white,fontSize: 23),
+                  ), //styleFrom
+                  onPressed: () {
+
+                    _sendMessage("DOWN");
+                    // incdec("down");
+                    // print("*****  $num  *****");
+
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Icon(Icons.volume_down_alt),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(left: 50,right: 50),
+                  child: ElevatedButton(
+                    style: ButtonStyle(
+                        shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(18.0),
+                                side: BorderSide(color: Colors.blue)
+                            )
+                        )
+                    ),
+                    onPressed: () {
+                      //
+                      // streamData.forEach((data) {
+                      //   Future.delayed(const Duration(milliseconds: 800),(){
+                      //     streamPlayer.foodSink!.add(FoodData(data));
+                      //   });
+                      // });
+
+                      _sendMessage("STOP");
+                      SVProgressHUD.showInfo(status: "Stopping...");
+                      Navigator.of(context).pop();
+                    },
+                    child: Padding(
+                      padding: const EdgeInsets.all(8),
+                      child: Text(
+                        "STOP",
+                        style: TextStyle(fontSize: 24),
+                      ),
+                    ),
+                  ),
+                ),
+
+                ElevatedButton(
+                  style:ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green,shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(100)),
+                    textStyle: TextStyle(color: Colors.white,fontSize: 23),
+                  ), //styleFrom
+                  onPressed: () {
+
+                    _sendMessage("UP");
+                    // incdec("up");
+                    // print("*****  $num  *****");
+
+
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.all(5),
+                    child: Icon(Icons.volume_up),
+                  ),
+                ),
+
+              ],
             )
           ],
         ));
@@ -375,4 +491,23 @@ class _DetailPageState extends State<DetailPage> {
 
     setState(() {});
   }
+
+  incdec(String vol){
+
+    if(vol == "up") {
+      if(num<=6){
+        setState(() {
+          num++;
+        });
+      }
+    } else if(vol == "down") {
+      if(num>=7){
+        setState(() {
+          num--;
+        });
+      }
+    }
+
+  }
+
 }
