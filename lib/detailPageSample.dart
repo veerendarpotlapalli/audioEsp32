@@ -38,7 +38,7 @@ class DetailPageSample extends StatefulWidget {
 class _DetailPageSampleState extends State<DetailPageSample> {
 
   TextEditingController password=TextEditingController();
-  late WebSocket ws;
+  // late WebSocket ws;
 
 
   BluetoothDevice? server;
@@ -73,22 +73,24 @@ class _DetailPageSampleState extends State<DetailPageSample> {
   late String wifiName ;
 
   String ch='';
+  String wifiConnection = "";
 
   var passcode = "";
-
-
+  var ipAdd = '';
 
   @override
   void initState() {
-    super.initState();
     player.openPlayer();
     createChannel();
     streamPlayer.openPlayer(enableVoiceProcessing: true);
     _getBTConnection();
-    //_timer = RestartableTimer(const Duration(seconds: 1), _completeByte);
+    // _getWIFIConnection();
+    _timer = RestartableTimer(const Duration(seconds: 1), _completeByte);
     _listofFiles();
     selectedFilePath = '';
-    // initStreamPlayer();
+    initStreamPlayer();
+    super.initState();
+
   }
   void initStreamPlayer()async{
     await streamPlayer.startPlayerFromStream(
@@ -116,6 +118,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
 
     wifiName = (await info.getWifiName())!;
     // password.text= (await info.getWifiIP())!;
+    ipAdd = (await info.getWifiIP())!;
     print(await info.getWifiIP());
     // final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 8080);
     // server.listen((event) {
@@ -123,31 +126,32 @@ class _DetailPageSampleState extends State<DetailPageSample> {
     //
     //   });
     // });
-    final server2 = await HttpServer.bind(InternetAddress.anyIPv4,8080);
-    print('Server running on port ${server2.port}');
+    // final server2 = await HttpServer.bind(InternetAddress.anyIPv4,8080);
+    // print('Server running on port ${server2.port}');
 
-    await for (HttpRequest request in server2) {
-      ws = await WebSocketTransformer.upgrade(request);
-      print('WebSocket request received');
-      ws.listen((message) {
-        print('Received message: $message');
-        Uint8List data=message as Uint8List;
-        if (data.isNotEmpty) {
-          chunks.add(data);
-          // var arr = _bytes!.buffer.asUint8List(data as int);
-          streamPlayer.foodSink!.add(FoodData(data));
-
-          setState(() {
-            contentLength += data.length;
-            _timer!.reset();
-
-            // streamData.add(data);
-          });
-        }
-
-        print("Content Length: ${contentLength}, chunks: ${chunks.length}");
-      });
-    }
+    // await for (HttpRequest request in server2) {
+    //   ws = await WebSocketTransformer.upgrade(request);
+    //   print('WebSocket request received');
+    //   ws.listen((message) {
+    //     print('Received message: $message');
+    //     Uint8List data=message as Uint8List;
+    //     if (data.isNotEmpty) {
+    //       chunks.add(data);
+    //       // var arr = _bytes!.buffer.asUint8List(data as int);
+    //       streamPlayer.foodSink!.add(FoodData(data));
+    //
+    //       setState(() {
+    //         contentLength += data.length;
+    //         _timer!.reset();
+    //
+    //         // streamData.add(data);
+    //
+    //       });
+    //     }
+    //
+    //     print("Content Length: ${contentLength}, chunks: ${chunks.length}");
+    //   });
+    // }
 
   }
 
@@ -207,10 +211,11 @@ class _DetailPageSampleState extends State<DetailPageSample> {
   void _onDataReceived(Uint8List data) async {
     if (data.isNotEmpty) {
       chunks.add(data);
+      wifiConnection = new String.fromCharCodes(data);
       // var arr = _bytes!.buffer.asUint8List(data as int);
       setState(() {
         // wifiList=utf8.decode(data);
-        print('${data}@@@@@@@@@@@@@@@@@@@@@@@@@@@@###');
+        print('${wifiConnection}@@@@@@@@@@@@@@@@@@@@@@@@@@@@###');
       });
       data.forEach((element) {
         if(element!=10) {
@@ -291,35 +296,11 @@ class _DetailPageSampleState extends State<DetailPageSample> {
 
                           // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ConnectToWifi(wifiName: e,)));
                         },
-                        // children: wifiList.map((e) {
-                        //   return  InkWell(
-                        //     onTap: (){
-                        //       ConnecttoWifi(index);
-                        //
-                        //       _sendMessage("SSID:${wifiList[index].toString()}");
-                        //
-                        //       // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ConnectToWifi(wifiName: e,)));
-                        //     },
-                        //     child: Padding(
-                        //       padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-                        //       child: SizedBox(
-                        //           width: MediaQuery.of(context).size.width*0.8,
-                        //           child:Row(
-                        //             mainAxisAlignment: MainAxisAlignment.start,
-                        //             children: [
-                        //               SizedBox(width: 10,),
-                        //               Icon(Icons.wifi),
-                        //               SizedBox(width: 10,),
-                        //               Text(e,style: TextStyle(color: Colors.black,fontSize: 16),)
-                        //             ],
-                        //           )
-                        //       ),
-                        //     ),
-                        //   );
-                        // }).toList(),
+
                       ),
                     );
                   },
+
                   // children: wifiList.map((e) {
                   //   return  InkWell(
                   //     onTap: (){
@@ -346,8 +327,10 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                   //     ),
                   //   );
                   // }).toList(),
+
                 ),
               ),
+
             ],
           )
               : const Center(
@@ -394,7 +377,67 @@ class _DetailPageSampleState extends State<DetailPageSample> {
     );
   }
 
-  void _showRecordingDialog() {
+  // void _showRecordingDialog() {
+  //   slideDialog.showSlideDialog(
+  //       barrierDismissible: false,
+  //       context: context,
+  //       child: Column(
+  //         crossAxisAlignment: CrossAxisAlignment.center,
+  //         mainAxisSize: MainAxisSize.min,
+  //         children: [
+  //           SizedBox(
+  //             height: 50,
+  //           ),
+  //           Text(
+  //             "Recording",
+  //             style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+  //           ),
+  //           SizedBox(
+  //             height: 100,
+  //           ),
+  //           Container(
+  //             width: 100,
+  //             height: 100,
+  //             child: CircularProgressIndicator(
+  //               strokeWidth: 10,
+  //               valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
+  //             ),
+  //           ),
+  //           SizedBox(
+  //             height: 100,
+  //           ),
+  //           ElevatedButton(
+  //             style: ButtonStyle(
+  //                 shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+  //                     RoundedRectangleBorder(
+  //                         borderRadius: BorderRadius.circular(18.0),
+  //                         side: BorderSide(color: Colors.red)
+  //                     )
+  //                 )
+  //             ),
+  //             onPressed: () {
+  //               // streamData.forEach((data) {
+  //               //   Future.delayed(const Duration(milliseconds: 800),(){
+  //               //     streamPlayer.foodSink!.add(FoodData(data));
+  //               //   });
+  //               // });
+  //               SVProgressHUD.showInfo(status: "Stopping...");
+  //               Navigator.of(context).pop();
+  //               ws.add("STOPREC");
+  //
+  //             },
+  //             child: Padding(
+  //               padding: const EdgeInsets.all(8),
+  //               child: Text(
+  //                 "STOP",
+  //                 style: TextStyle(fontSize: 24),
+  //               ),
+  //             ),
+  //           )
+  //         ],
+  //       ));
+  // }
+  void _showWIFIRecordingDialog() {
     slideDialog.showSlideDialog(
         barrierDismissible: false,
         context: context,
@@ -406,19 +449,8 @@ class _DetailPageSampleState extends State<DetailPageSample> {
               height: 50,
             ),
             Text(
-              "Recording",
+              "Click start to start recording",
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(
-              height: 100,
-            ),
-            Container(
-              width: 100,
-              height: 100,
-              child: CircularProgressIndicator(
-                strokeWidth: 10,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.red),
-              ),
             ),
             SizedBox(
               height: 100,
@@ -428,7 +460,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                   shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                       RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(18.0),
-                          side: BorderSide(color: Colors.red)
+                          side: BorderSide(color: Colors.blue)
                       )
                   )
               ),
@@ -438,14 +470,14 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                 //     streamPlayer.foodSink!.add(FoodData(data));
                 //   });
                 // });
-                _sendMessage("STOP");
-                SVProgressHUD.showInfo(status: "Stopping...");
                 Navigator.of(context).pop();
+                // _showRecordingDialog();
+                // ws.add("STARTREC");
               },
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: Text(
-                  "STOP",
+                  "START",
                   style: TextStyle(fontSize: 24),
                 ),
               ),
@@ -453,6 +485,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
           ],
         ));
   }
+
 
   Future<String> get _localPath async {
     final directory = await getExternalStorageDirectory();
@@ -544,8 +577,16 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                                   onPressed: (){
                                     // ws.add('START');
                                     passcode = password.text.toString();
+                                    // ipAdd = await info.getWifiIP().toString();
                                     _sendMessage("PWD:$passcode");
+                                    _sendMessage("IP:$ipAdd");
+                                    print("****************####################@@@@@@@@@@@@@@@");
                                     print(InternetAddress.loopbackIPv4);
+                                    Navigator.of(context).pop();
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ConnectToWifi(wifiName: "okay",)));
+
+                                    // _showWIFIRecordingDialog();
+                                    // _showRecordingDialog();
                                     setState(() {
                                       // wifiName.text=InternetAddress.loopbackIPv4.address;
                                     });
@@ -572,52 +613,52 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                               height: 10,
                             ),
 
-                            Expanded(
-                              child: ListView(
-                                children: files
-                                    .map((_file) => FileEntityListTile(
-                                  filePath: _file.path,
-                                  fileSize: _file.statSync().size,
-                                  onLongPress: () async {
-                                    print("onLongPress item");
-                                    if (await File(_file.path).exists()) {
-                                      File(_file.path).deleteSync();
-                                      files.remove(_file);
-                                      setState(() {});
-                                    }
-                                  },
-                                  onTap: () async {
-                                    print("onTap item");
-                                    player.startPlayer(fromURI: _file.path);
-                                    if (_file.path == selectedFilePath) {
-                                      print("++++++++++++++++++@@@@@@@@@@@***${_file.path}");
-                                      await player.stopPlayer();
-                                      selectedFilePath = '';
-                                      return;
-                                    }
-
-                                    if (await File(_file.path).exists()) {
-                                      selectedFilePath = _file.path;
-                                      // controller.startPlayer(finishMode: FinishMode.stop);
-
-
-                                      player.startPlayer(fromURI: _file.path,codec: Codec.pcm16);
-
-                                      print("***${_file.path}");
-
-                                      print("***${_file.path}");
-
-                                    } else {
-                                      selectedFilePath = '';
-                                    }
-
-
-                                    setState(() {});
-                                  },
-                                ))
-                                    .toList(),
-                              ),
-                            ),
+                            // Expanded(
+                            //   child: ListView(
+                            //     children: files
+                            //         .map((_file) => FileEntityListTile(
+                            //       filePath: _file.path,
+                            //       fileSize: _file.statSync().size,
+                            //       onLongPress: () async {
+                            //         print("onLongPress item");
+                            //         if (await File(_file.path).exists()) {
+                            //           File(_file.path).deleteSync();
+                            //           files.remove(_file);
+                            //           setState(() {});
+                            //         }
+                            //       },
+                            //       onTap: () async {
+                            //         print("onTap item");
+                            //         player.startPlayer(fromURI: _file.path);
+                            //         if (_file.path == selectedFilePath) {
+                            //           print("++++++++++++++++++@@@@@@@@@@@***${_file.path}");
+                            //           await player.stopPlayer();
+                            //           selectedFilePath = '';
+                            //           return;
+                            //         }
+                            //
+                            //         if (await File(_file.path).exists()) {
+                            //           selectedFilePath = _file.path;
+                            //           // controller.startPlayer(finishMode: FinishMode.stop);
+                            //
+                            //
+                            //           player.startPlayer(fromURI: _file.path,codec: Codec.pcm16);
+                            //
+                            //           print("***${_file.path}");
+                            //
+                            //           print("***${_file.path}");
+                            //
+                            //         } else {
+                            //           selectedFilePath = '';
+                            //         }
+                            //
+                            //
+                            //         setState(() {});
+                            //       },
+                            //     ))
+                            //         .toList(),
+                            //   ),
+                            // ),
                           ],
                         ),
                       ),
@@ -759,12 +800,41 @@ class _DetailPageSampleState extends State<DetailPageSample> {
 
   }
 
+  // _getWIFIConnection() {
+  //   BluetoothConnection.toAddress(widget.server!.address).then((_connection) {
+  //     setState(() {
+  //       connection = _connection;
+  //     });
+  //     isConnecting = false;
+  //     isDisconnecting = false;
+  //     setState(() {});
+  //     _connection.input!.listen(_onWIFIDataReceived).onDone(() {
+  //       if (wifiConncet == "CONNECTED") {
+  //         print('****************CONNECTED###########################');
+  //       } else {
+  //         print('#########################@@@@@@@@@@@@@@@@@@@@@@@@@@@@***********************');
+  //       }
+  //       if (this.mounted) {
+  //         setState(() {});
+  //       }
+  //       Navigator.of(context).pop();
+  //     });
+  //   }).catchError((error) {
+  //     Navigator.of(context).pop();
+  //   });
+  // }
 
-  myWifiList(){
-    return wifiList.map((e){
-      return e.toString();
-    }).toList();
-  }
+  // _onWIFIDataReceived(Uint8List wifidata) async {
+  //   if (wifidata.isNotEmpty) {
+  //     chunks.add(wifidata);
+  //     // var arr = _bytes!.buffer.asUint8List(data as int);
+  //     setState(() {
+  //       // wifiList=utf8.decode(data);
+  //       wifiConncet = wifidata.toString() ;
+  //       print('${wifidata}@@@@@@@@@@@@@@@@@@@@@@@@@@@@###');
+  //     });
+  //   }
+  // }
 
 
 }

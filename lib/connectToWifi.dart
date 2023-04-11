@@ -1,9 +1,6 @@
-import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
-import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
-import 'package:vsaudio/wav_header.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
 import 'package:async/async.dart';
@@ -12,25 +9,15 @@ import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:slide_popup_dialog_null_safety/slide_popup_dialog.dart' as slideDialog;
+import 'package:vsaudio/wav_header.dart';
 import 'file_entity_list_tile.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
 import 'detailpage.dart';
-import 'detailPageSample.dart';
-
-
-
-enum ConnectionState { connected, disconnected }
-
-
 class ConnectToWifi extends StatefulWidget {
-
-  final name = NetworkInfo();
-
-  late String wifiName = name.getWifiName() as String;
-
+  late String wifiName;
 
   ConnectToWifi({super.key, required this.wifiName});
 
@@ -40,17 +27,10 @@ class ConnectToWifi extends StatefulWidget {
 
 class _ConnectToWifiState extends State<ConnectToWifi> {
   TextEditingController password=TextEditingController();
-
   late WebSocket ws;
-
-
-
-  BluetoothConnection? connection;
-
-  bool get isConnected => connection != null && connection!.isConnected;
+  bool isConnecting = true;
 
   bool isDisconnecting = false;
-  bool isConnecting = true;
 
   List<List<int>> chunks = <List<int>>[];
   int contentLength = 0;
@@ -58,13 +38,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
   // PlayerController controller = PlayerController();// Initialise
 
   RestartableTimer? _timer;
-
-  final DetailPageSample detailPageSample = new DetailPageSample();
-
-  ConnectionState _connectionState = ConnectionState.connected  ;
-
   RecordState _recordState = RecordState.stopped;
-
   DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
   Uint8List? dataStream;
 
@@ -75,84 +49,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
 
   final info=NetworkInfo();
 
-
-  @override
-  void initState() {
-    createChannel();
-    // _getBTConnection();
-    player.openPlayer();
-    streamPlayer.openPlayer(enableVoiceProcessing: true);
-    _timer = RestartableTimer(const Duration(seconds: 1), _completeByte);
-    _listofFiles();
-    selectedFilePath = '';
-    initStreamPlayer();
-
-    // TODO: implement initState
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    if (isConnected) {
-      isDisconnecting = true;
-      connection!.dispose();
-      connection = null;
-
-    }
-    _timer!.cancel();
-    super.dispose();
-  }
-
-
-  // _getBTConnection() {
-  //   BluetoothConnection.toAddress(widget.server!.address).then((_connection) {
-  //     setState(() {
-  //       connection = _connection;
-  //     });
-  //     isConnecting = false;
-  //     isDisconnecting = false;
-  //     setState(() {});
-  //     _connection.input!.listen(_onDataReceived).onDone(() {
-  //       if (isDisconnecting) {
-  //         print('Disconnecting locally');
-  //       } else {
-  //         print('Disconnecting remotely');
-  //       }
-  //       if (this.mounted) {
-  //         setState(() {});
-  //       }
-  //       Navigator.of(context).pop();
-  //     });
-  //   }).catchError((error) {
-  //     Navigator.of(context).pop();
-  //   });
-  // }
-
-
-
-  // void _sendMessage(String text) async {
-  //   text = text.trim();
-  //   if (text.length > 0) {
-  //     try {
-  //       List<int> list = utf8.encode(text);
-  //       Uint8List bytes = Uint8List.fromList(list);
-  //
-  //       connection!.output.add(bytes);
-  //       await connection!.output.allSent;
-  //
-  //       if (text == "START") {
-  //         _connectionState = ConnectionState.connected;
-  //       } else if (text == "STOP") {
-  //         _connectionState = ConnectionState.disconnected;
-  //       }
-  //       setState(() {});
-  //     } catch (e) {
-  //       setState(() {});
-  //     }
-  //   }
-  // }
-
-
+  String stopBtn = "Start";
 
   _completeByte() async {
     if (chunks.isEmpty || contentLength == 0) return;
@@ -165,7 +62,6 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
       _bytes!.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
     }
-
     final file = await _makeNewFile;
     var headerList = WavHeader.createWavHeader(contentLength);
 
@@ -186,7 +82,6 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
   void _onDataReceived(Uint8List data) async {
 
   }
-
   void createChannel()async{
     password.text= (await info.getWifiIP())!;
     print(await info.getWifiIP());
@@ -233,8 +128,18 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
     streamPlayer.setSubscriptionDuration(Duration(milliseconds: 500));
     streamPlayer.setVolume(1.0);
   }
-
-
+  @override
+  void initState() {
+    createChannel();
+    player.openPlayer();
+    streamPlayer.openPlayer(enableVoiceProcessing: true);
+    _timer = RestartableTimer(const Duration(seconds: 1), _completeByte);
+    _listofFiles();
+    selectedFilePath = '';
+    initStreamPlayer();
+    // TODO: implement initState
+    super.initState();
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -250,73 +155,68 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-                child: SizedBox(
-                    width: MediaQuery.of(context).size.width*0.8,
-                    child:Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 10,),
-                        Icon(Icons.wifi),
-                        SizedBox(width: 10,),
-                        Text(widget.wifiName,style: TextStyle(color: Colors.black,fontSize: 16),),
-                      ],
-                    )
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-                child: SizedBox(
-                  width: MediaQuery.of(context).size.width*0.8,
-                  child: TextField(
-                    controller: password,
-                    decoration: InputDecoration(
-                        hoverColor: Colors.black,
-                        prefixIcon: Icon(Icons.key),
-                        hintText: 'Enter Password'
-                    ),
-                    style: TextStyle(color: Colors.black),
-                    keyboardType: TextInputType.text,
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
+              //   child: SizedBox(
+              //       width: MediaQuery.of(context).size.width*0.8,
+              //       child:Row(
+              //         mainAxisAlignment: MainAxisAlignment.start,
+              //         children: [
+              //           SizedBox(width: 10,),
+              //           Icon(Icons.wifi),
+              //           SizedBox(width: 10,),
+              //           Text(widget.wifiName,style: TextStyle(color: Colors.black,fontSize: 16),)
+              //         ],
+              //       )
+              //   ),
+              // ),
+              // Padding(
+              //   padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
+              //   child: SizedBox(
+              //     width: MediaQuery.of(context).size.width*0.8,
+              //     child: TextField(
+              //       controller: password,
+              //       decoration: InputDecoration(
+              //           hoverColor: Colors.black,
+              //           prefixIcon: Icon(Icons.key),
+              //           hintText: 'Enter Password'
+              //       ),
+              //       style: TextStyle(color: Colors.black),
+              //       keyboardType: TextInputType.text,
+              //     ),
+              //   ),
+              // ),
+              // SizedBox(
+              //   height: 20,
+              // ),
               SizedBox(
                 width: MediaQuery.of(context).size.width*0.4,
                 child: TextButton(
                     style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
                     onPressed: (){
-                      // ws.add('START');
-                      // detailPageSample._sendMessage("GO");
-                      print(InternetAddress.loopbackIPv4);
-                      setState(() {
-                        // wifiName.text=InternetAddress.loopbackIPv4.address;
-                      });
+                      stopBtn = "Recording...";
+                      ws.add('STARTREC');
+                      // print(InternetAddress.loopbackIPv4);
+                      // setState(() {
+                      //   // wifiName.text=InternetAddress.loopbackIPv4.address;
+                      // });
                     },
-                    child:Text('Connect',style: TextStyle(color: Colors.white),)),
+                    child:Text(stopBtn,style: TextStyle(color: Colors.white),)),
               ),
               SizedBox(
                 width: MediaQuery.of(context).size.width*0.4,
                 child: TextButton(
                     style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
                     onPressed: (){
-                      ws.add('STOP');
-                      print(InternetAddress.loopbackIPv4);
-                      setState(() {
-                        // wifiName.text=InternetAddress.loopbackIPv4.address;
-                      });
+                      stopBtn = "Start";
+                      ws.add('STOPREC');
+                      // print(InternetAddress.loopbackIPv4);
+                      // setState(() {
+                      //   // wifiName.text=InternetAddress.loopbackIPv4.address;
+                      // });
                     },
                     child:Text('Stop',style: TextStyle(color: Colors.white),)),
               ),
-
-              SizedBox(
-                width: MediaQuery.of(context).size.width,
-                height: 10,
-              ),
-
               Expanded(
                 child: ListView(
                   children: files
@@ -335,7 +235,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
                       print("onTap item");
                       player.startPlayer(fromURI: _file.path);
                       if (_file.path == selectedFilePath) {
-                        print("++++++++++++++++++@@@@@@@@@@@***${_file.path}");
+                        print("++++++++++++++++++@@@@@@@@@@@***********${_file.path}");
                         await player.stopPlayer();
                         selectedFilePath = '';
                         return;
@@ -346,11 +246,11 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
                         // controller.startPlayer(finishMode: FinishMode.stop);
 
 
-                        player.startPlayer(fromURI: _file.path,codec: Codec.pcm16);
+                        player.startPlayer(fromURI: _file.path,codec: Codec.pcm16WAV);
 
-                        print("***${_file.path}");
+                        print("***************${_file.path}");
 
-                        print("***${_file.path}");
+                        print("***************${_file.path}");
 
                       } else {
                         selectedFilePath = '';
@@ -395,6 +295,4 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
 
     setState(() {});
   }
-
-
 }
