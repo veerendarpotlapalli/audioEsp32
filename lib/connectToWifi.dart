@@ -219,8 +219,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
               ),
               Expanded(
                 child: ListView(
-                  children: files
-                      .map((_file) => FileEntityListTile(
+                  children: files.map((_file) => FileEntityListTile(
                     filePath: _file.path,
                     fileSize: _file.statSync().size,
                     onLongPress: () async {

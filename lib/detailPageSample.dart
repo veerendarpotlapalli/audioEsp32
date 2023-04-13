@@ -120,6 +120,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
     // password.text= (await info.getWifiIP())!;
     ipAdd = (await info.getWifiIP())!;
     print(await info.getWifiIP());
+
     // final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 8080);
     // server.listen((event) {
     //   event.listen((data) {
@@ -437,6 +438,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
   //         ],
   //       ));
   // }
+
   void _showWIFIRecordingDialog() {
     slideDialog.showSlideDialog(
         barrierDismissible: false,
@@ -575,16 +577,17 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                               child: TextButton(
                                   style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
                                   onPressed: (){
-                                    // ws.add('START');
+                                    // ws.add('START') ;
                                     passcode = password.text.toString();
                                     // ipAdd = await info.getWifiIP().toString();
                                     _sendMessage("PWD:$passcode");
                                     _sendMessage("IP:$ipAdd");
                                     print("****************####################@@@@@@@@@@@@@@@");
                                     print(InternetAddress.loopbackIPv4);
-                                    Navigator.of(context).pop();
+                                    // Navigator.of(context).pop();
+                                    // wifiConnection == "WIFI:CONNECTED" ?
                                     Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ConnectToWifi(wifiName: "okay",)));
-
+                                        // CircularProgressIndicator();
                                     // _showWIFIRecordingDialog();
                                     // _showRecordingDialog();
                                     setState(() {
@@ -799,42 +802,6 @@ class _DetailPageSampleState extends State<DetailPageSample> {
     // );
 
   }
-
-  // _getWIFIConnection() {
-  //   BluetoothConnection.toAddress(widget.server!.address).then((_connection) {
-  //     setState(() {
-  //       connection = _connection;
-  //     });
-  //     isConnecting = false;
-  //     isDisconnecting = false;
-  //     setState(() {});
-  //     _connection.input!.listen(_onWIFIDataReceived).onDone(() {
-  //       if (wifiConncet == "CONNECTED") {
-  //         print('****************CONNECTED###########################');
-  //       } else {
-  //         print('#########################@@@@@@@@@@@@@@@@@@@@@@@@@@@@***********************');
-  //       }
-  //       if (this.mounted) {
-  //         setState(() {});
-  //       }
-  //       Navigator.of(context).pop();
-  //     });
-  //   }).catchError((error) {
-  //     Navigator.of(context).pop();
-  //   });
-  // }
-
-  // _onWIFIDataReceived(Uint8List wifidata) async {
-  //   if (wifidata.isNotEmpty) {
-  //     chunks.add(wifidata);
-  //     // var arr = _bytes!.buffer.asUint8List(data as int);
-  //     setState(() {
-  //       // wifiList=utf8.decode(data);
-  //       wifiConncet = wifidata.toString() ;
-  //       print('${wifidata}@@@@@@@@@@@@@@@@@@@@@@@@@@@@###');
-  //     });
-  //   }
-  // }
 
 
 }
