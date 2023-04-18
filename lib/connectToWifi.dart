@@ -6,16 +6,21 @@ import 'package:flutter_sound/flutter_sound.dart';
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:slide_popup_dialog_null_safety/slide_popup_dialog.dart' as slideDialog;
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vsaudio/wav_header.dart';
 import 'file_entity_list_tile.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-import 'detailpage.dart';
+import 'package:webview_flutter/webview_flutter.dart';
+
+// import 'detailpage.dart';
+
 class ConnectToWifi extends StatefulWidget {
   late String wifiName;
 
@@ -27,7 +32,7 @@ class ConnectToWifi extends StatefulWidget {
 
 class _ConnectToWifiState extends State<ConnectToWifi> {
   TextEditingController password=TextEditingController();
-  late WebSocket ws;
+  late WebSocket webSocket;
   bool isConnecting = true;
 
   bool isDisconnecting = false;
@@ -38,14 +43,14 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
   // PlayerController controller = PlayerController();// Initialise
 
   RestartableTimer? _timer;
-  RecordState _recordState = RecordState.stopped;
+  // RecordState _recordState = RecordState.stopped;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
   Uint8List? dataStream;
 
   List<FileSystemEntity> files = <FileSystemEntity>[];
   String? selectedFilePath;
   final player = FlutterSoundPlayer(voiceProcessing: true);
-  final streamPlayer = FlutterSoundPlayer();
+  final streamPlayer = FlutterSoundPlayer(voiceProcessing: true);
 
   final info=NetworkInfo();
 
@@ -79,9 +84,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
     chunks.clear();
   }
 
-  void _onDataReceived(Uint8List data) async {
 
-  }
   void createChannel()async{
     password.text= (await info.getWifiIP())!;
     print(await info.getWifiIP());
@@ -95,9 +98,9 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
     print('Server running on port ${server2.port}');
 
     await for (HttpRequest request in server2) {
-      ws = await WebSocketTransformer.upgrade(request);
+      webSocket = await WebSocketTransformer.upgrade(request);
       print('WebSocket request received');
-      ws.listen((message) {
+      webSocket.listen((message) {
         print('Received message: $message');
         Uint8List data=message as Uint8List;
         if (data.isNotEmpty) {
@@ -125,7 +128,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
         sampleRate: 44100
     );
 
-    streamPlayer.setSubscriptionDuration(Duration(milliseconds: 500));
+    streamPlayer.setSubscriptionDuration(Duration(milliseconds: 300));
     streamPlayer.setVolume(1.0);
   }
   @override
@@ -155,6 +158,7 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+
               // Padding(
               //   padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
               //   child: SizedBox(
@@ -189,17 +193,24 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
               // SizedBox(
               //   height: 20,
               // ),
+
               SizedBox(
                 width: MediaQuery.of(context).size.width*0.4,
                 child: TextButton(
                     style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
-                    onPressed: (){
+                    onPressed: () async {
+
+                      // ipWebView();
+
+                      // var url = Uri.parse('http://192.168.4.1/');
+                      //   await launchUrl(url);
+
                       stopBtn = "Recording...";
-                      ws.add('STARTREC');
-                      // print(InternetAddress.loopbackIPv4);
-                      // setState(() {
-                      //   // wifiName.text=InternetAddress.loopbackIPv4.address;
-                      // });
+                      webSocket.add('STARTREC');
+                      print(InternetAddress.loopbackIPv4);
+                      setState(() {
+                        // wifiName.text=InternetAddress.loopbackIPv4.address;
+                      });
                     },
                     child:Text(stopBtn,style: TextStyle(color: Colors.white),)),
               ),
@@ -209,11 +220,11 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
                     style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
                     onPressed: (){
                       stopBtn = "Start";
-                      ws.add('STOPREC');
-                      // print(InternetAddress.loopbackIPv4);
-                      // setState(() {
-                      //   // wifiName.text=InternetAddress.loopbackIPv4.address;
-                      // });
+                      webSocket.add('STOPREC');
+                      print(InternetAddress.loopbackIPv4);
+                      setState(() {
+                        // wifiName.text=InternetAddress.loopbackIPv4.address;
+                      });
                     },
                     child:Text('Stop',style: TextStyle(color: Colors.white),)),
               ),
@@ -294,4 +305,16 @@ class _ConnectToWifiState extends State<ConnectToWifi> {
 
     setState(() {});
   }
+
+   ipWebView (){
+
+    return Scaffold(
+      body: WebViewWidget(controller: WebViewController()
+      ..loadRequest(Uri.parse('https://amazon.com')),
+
+    ),
+    );
+
+  }
+
 }

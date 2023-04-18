@@ -50,6 +50,14 @@ dependencies:
   fluttertoast: ^8.2.1
   share_plus: ^6.3.2
   file_picker: ^5.2.9
+  webview_flutter: ^4.0.7
+  url_launcher: ^6.1.10
+
+  audioplayers: ^4.0.1
+  just_audio: ^0.9.32
+
+  ffmpeg_kit_flutter: ^5.1.0
+#  flutter_ffmpeg: ^0.4.2
 
   #  just_audio: ^0.9.31
   #  flutter_bluetooth_serial: ^0.4.0

@@ -1,16 +1,28 @@
 // import 'package:flutter_bluetooth_serial/flutter_bluetooth_serial.dart';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:typed_data';
+import 'dart:async';
 
+
+import 'package:audioplayers/audioplayers.dart';
+import 'package:ffmpeg_kit_flutter/return_code.dart';
 import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
-import 'package:network_info_plus/network_info_plus.dart';
+import 'package:intl/intl.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:vsaudio/BluetoothDeviceListEntry.dart';
 import 'package:vsaudio/connectToWifi.dart';
 import 'package:vsaudio/detailPageSample.dart';
+import 'package:vsaudio/http_web.dart';
 // import 'demodetail.dart';
 import 'detailpage.dart';
 import 'package:flutter/material.dart';
 
+import 'package:ffmpeg_kit_flutter/ffmpeg_kit.dart';
+import 'package:ffmpeg_kit_flutter/ffprobe_kit.dart';
+
+import 'package:ffmpeg_kit_flutter/level.dart';
+import 'package:ffmpeg_kit_flutter/log.dart';
 
 void main() {
   runApp(MyApp());
@@ -21,11 +33,14 @@ class MyApp extends StatelessWidget {
 final wifiName = "okay";
 
 
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomePage(),
-      // home: ConnectToWifi(wifiName: name),
+      // home: HomePage(), //bluetooth,websocket,smartConfig
+      home: ConnectToWifi(wifiName: wifiName), //websocket
+      // home: httpWeb(), //http,web
+
       debugShowCheckedModeBanner: false,
     );
   }
@@ -41,6 +56,11 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
 
   List<BluetoothDevice> devices = <BluetoothDevice>[];
+  DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
+
+
+  AudioPlayer audioPlayer = AudioPlayer();
+
 
   @override
   void initState() {
@@ -130,7 +150,19 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
               subtitle: Text(_bluetoothState.toString()),
               trailing: ElevatedButton(
                 child: Text("Settings"),
-                onPressed: () {
+                onPressed: () async {
+
+                  // final url = "tcp://192.168.4.1:80";
+                  // final directory = await getExternalStorageDirectory();
+                  // final path = directory!.path;
+                  // final fileName = dateFormat.format(DateTime.now());
+                  // final outputFile = '$path/$fileName.wav';
+                  //
+                  // saveAudioStream(url, outputFile);
+
+                  // var url = Uri.parse('http://192.168.4.1/');
+                  // await launchUrl(url);
+
                   FlutterBluetoothSerial.instance.openSettings();
                 },
               ),
@@ -161,5 +193,28 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       return DetailPageSample(server: server);
     }));
   }
+
+
+  void saveAudioStream(String url, String outputFile) async {
+
+    print("***************##########@@@@@@@@@@@@@@@#$outputFile");
+    print("***************##########@@@@@@@@@@@@@@@#$url");
+
+    final arguments = ['-i', url, '-c', 'copy', outputFile];
+
+    await FFmpegKit.execute(arguments.toString()).then((session) async {
+      final returnCode = await session.getReturnCode();
+      if(ReturnCode.isSuccess(returnCode)) {
+        print('ewwwwwwwwwwwwwwwwwwwwww');
+      } else if(ReturnCode.isCancel(returnCode)) {
+        print('*************canceled**************');
+      } else {
+        print('###########error#############');
+      }
+    });
+
+  }
+
+
 
 }

@@ -5,6 +5,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:vsaudio/connectToWifi.dart';
 
 import 'package:vsaudio/wav_header.dart';
@@ -291,7 +292,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                         title: Text(wifiList[index]),
                         leading: Icon(Icons.wifi),
                         onTap: (){
-                          ConnecttoWifi(index);
+                          ConnecttoWifiPopUp(index);
 
                           _sendMessage("SSID:${wifiList[index].toString()}");
 
@@ -358,7 +359,8 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                 )
             )
         ),
-        onPressed: () {
+        onPressed: () async {
+
           streamPlayer.startPlayer(fromDataBuffer: dataStream,codec: Codec.pcm16);
           if (_scanState == ScanningState.stopped) {
             _sendMessage("SCAN");
@@ -366,6 +368,10 @@ class _DetailPageSampleState extends State<DetailPageSample> {
           } else {
             _sendMessage("STOP");
           }
+
+          // var url = Uri.parse('http://192.168.4.1/');
+          // await launchUrl(url);
+
         },
         child: Padding(
           padding: const EdgeInsets.all(8.0),
@@ -516,7 +522,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
   }
 
 
-  ConnecttoWifi(int index){
+  ConnecttoWifiPopUp(int index){
 
     print("******************##################${wifiList[index].characters}");
 
@@ -576,7 +582,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                               width: MediaQuery.of(context).size.width*0.4,
                               child: TextButton(
                                   style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
-                                  onPressed: (){
+                                  onPressed: () async {
                                     // ws.add('START') ;
                                     passcode = password.text.toString();
                                     // ipAdd = await info.getWifiIP().toString();
@@ -593,6 +599,10 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                                     setState(() {
                                       // wifiName.text=InternetAddress.loopbackIPv4.address;
                                     });
+
+                                    // var url = Uri.parse('http://192.168.4.1/');
+                                    // await launchUrl(url);
+
                                   },
                                   child:Text('Connect',style: TextStyle(color: Colors.white),)),
                             ),
@@ -600,13 +610,15 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                               width: MediaQuery.of(context).size.width*0.4,
                               child: TextButton(
                                   style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
-                                  onPressed: (){
+                                  onPressed: () async {
                                     // ws.add('STOP');
                                     _sendMessage("BACK");
                                     print(InternetAddress.loopbackIPv4);
                                     setState(() {
                                       // wifiName.text=InternetAddress.loopbackIPv4.address;
                                     });
+
+
                                   },
                                   child:Text('Stop',style: TextStyle(color: Colors.white),)),
                             ),

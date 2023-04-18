@@ -31,10 +31,4 @@ class FileEntityListTile extends ListTile {
           ),
         ],
       ));
-
-  Future<String> get _localPath async {
-    final directory = await getExternalStorageDirectory();
-    return directory!.path;
-  }
-
 }

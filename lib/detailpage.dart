@@ -414,7 +414,7 @@ class _DetailPageState extends State<DetailPage> {
                         shape: MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(18.0),
-                                side: BorderSide(color: Colors.blue)
+                                side: BorderSide(color: Colors.blue),
                             )
                         )
                     ),
