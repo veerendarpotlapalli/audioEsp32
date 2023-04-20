@@ -11,9 +11,10 @@ import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vsaudio/BluetoothDeviceListEntry.dart';
-import 'package:vsaudio/connectToWifi.dart';
+import 'package:vsaudio/webSocketStreamSave.dart';
 import 'package:vsaudio/detailPageSample.dart';
 import 'package:vsaudio/http_web.dart';
+import 'package:vsaudio/webSocketCheckSums.dart';
 // import 'demodetail.dart';
 import 'detailpage.dart';
 import 'package:flutter/material.dart';
@@ -38,8 +39,9 @@ final wifiName = "okay";
   Widget build(BuildContext context) {
     return MaterialApp(
       // home: HomePage(), //bluetooth,websocket,smartConfig
-      home: ConnectToWifi(wifiName: wifiName), //websocket
+      home: WebSocketStreamSave(), //websocket stream and save
       // home: httpWeb(), //http,web
+      // home: WebSocketCheckSums(wifiName: wifiName,), //web socket stream and save with check sums
 
       debugShowCheckedModeBanner: false,
     );

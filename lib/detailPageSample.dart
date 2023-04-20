@@ -6,7 +6,7 @@ import 'dart:typed_data';
 import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:vsaudio/connectToWifi.dart';
+import 'package:vsaudio/webSocketStreamSave.dart';
 
 import 'package:vsaudio/wav_header.dart';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -592,7 +592,7 @@ class _DetailPageSampleState extends State<DetailPageSample> {
                                     print(InternetAddress.loopbackIPv4);
                                     // Navigator.of(context).pop();
                                     // wifiConnection == "WIFI:CONNECTED" ?
-                                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ConnectToWifi(wifiName: "okay",)));
+                                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WebSocketStreamSave()));
                                         // CircularProgressIndicator();
                                     // _showWIFIRecordingDialog();
                                     // _showRecordingDialog();
