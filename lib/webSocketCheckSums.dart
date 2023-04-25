@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:convert';
 
+import 'package:binary_codec/binary_codec.dart';
+import 'package:crypto/crypto.dart';
 import 'package:flutter_sound/flutter_sound.dart';
 
 import 'package:async/async.dart';
@@ -15,13 +18,14 @@ import 'file_entity_list_tile.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:crc32_checksum/crc32_checksum.dart';
 
 
 
 class WebSocketCheckSums extends StatefulWidget {
   late String wifiName;
 
-  WebSocketCheckSums({super.key, required this.wifiName});
+  WebSocketCheckSums({super.key});
 
   @override
   State<WebSocketCheckSums> createState() => _WebSocketCheckSumsState();
@@ -53,19 +57,22 @@ class _WebSocketCheckSumsState extends State<WebSocketCheckSums> {
 
   String stopBtn = "Start";
 
+  String hashString ='';
+
   List<int> websockdata = [];
   var websockhash = '';
 
   _completeByte() async {
     if (chunks.isEmpty || contentLength == 0) return;
     SVProgressHUD.dismiss();
-    print("CompleteByte length : $contentLength");
+    print("+++++++++++++++++++++++++++++++++CompleteByte length : $contentLength");
     _bytes = Uint8List(contentLength);
     int offset = 0;
     for (final List<int> chunk in chunks) {
       // streamPlayer.feedFromStream(Unit8List.fromList(chunk));
       _bytes!.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
+
     }
     final file = await _makeNewFile;
     var headerList = WavHeader.createWavHeader(contentLength);
@@ -75,6 +82,8 @@ class _WebSocketCheckSumsState extends State<WebSocketCheckSums> {
     });
     file.writeAsBytesSync(headerList, mode: FileMode.write);
     file.writeAsBytesSync(_bytes!, mode: FileMode.append);
+
+    print('??????????????????????????????${_bytes}????????????????????????????????????');
 
     print(await file.length());
 
@@ -86,6 +95,7 @@ class _WebSocketCheckSumsState extends State<WebSocketCheckSums> {
 
 
   void createChannel()async{
+
     password.text= (await info.getWifiIP())!;
     print(await info.getWifiIP());
     final server2 = await HttpServer.bind(InternetAddress.anyIPv4,8080);
@@ -93,48 +103,64 @@ class _WebSocketCheckSumsState extends State<WebSocketCheckSums> {
 
     await for (HttpRequest request in server2) {
       webSocket = await WebSocketTransformer.upgrade(request);
-      print('WebSocket request received');
+      print('WebSocket request received.........................');
       webSocket.listen((message) {
-        print('@@@@@@@@@@@@@@@Received message@@@@@@@@@@@@@@@: $message');
+          if(message.length == 512) {
+            print('@@@@@@@@@@@@@@@Received message@@@@@@@@@@@@@@@: $message');
+            Uint8List data=message as Uint8List;
+            if (data.isNotEmpty) {
+            chunks.add(data);
 
-        // if(message.length == 1024) {
-        //   websockdata = message;
-        //
-        //   List<int> charCodes = websockdata;
-        //
-        //   Digest hello256 = sha256.convert(charCodes);
-        //   hashString = hello256.toString(); // convert hash to base64-encoded string
-        //   print('------------${hashString}-------------');
-        //
-        //   // setState(() {});
-        //
-        //
-        // } else if(message.length == 64){
-        //   websockhash = message.toString();
-        //   if(hashString == websockhash.toString()) {
-        //     print('________________oooooooooooooooooooo_____________________');
-        //     webSocket.add('ACK');
-        //   } else {
-        //     print('____________________nnnnnnnnnnnnnnnnnnnnnnnnnn______________________');
-        //     webSocket.add('NOACK');
-        //   }
-        //   // setState(() {});
-        // }
+            websockdata = message;
 
+            List<int> charCodes = websockdata;
 
-        Uint8List data=message as Uint8List;
-        if (data.isNotEmpty) {
-          chunks.add(data);
-          streamPlayer.foodSink!.add(FoodData(data));
+            Digest hello256 = sha256.convert(charCodes);
+            hashString = hello256.toString(); // convert hash to base64-encoded string
+            print('------------${hashString}-------------');
 
+            setState(() {});
+
+          }
 
           setState(() {
             contentLength += data.length;
             _timer!.reset();
-          });
+          });  //setState
+
+         }
+
+            else if(message.length == 64){
+          websockhash = message.toString();
+          print('<<<<<<<<<<<<$websockhash<<<<<<<<<<<<<<<<');
+
+
+          String binYes = 'Y';
+          String binNo = 'N';
+
+          Uint8List encodeY = binaryCodec.encode(binYes);
+          Uint8List encodeN = binaryCodec.encode(binNo);
+
+          var decodeY = binaryCodec.decode(encodeY);
+          var decodeN = binaryCodec.decode(encodeN);
+
+          if(hashString == websockhash.toString()) {
+
+            webSocket.add(decodeY);
+            print('____________________oooooooooo${decodeY}ooooooooo______________________');
+
+            Uint8List audiodata = websockdata as Uint8List;
+
+            streamPlayer.foodSink!.add(FoodData(audiodata));
+
+          } else {
+            print('____________________nnnnnnnnnnnn${decodeN}nnnnnnnnnnnnnn______________________');
+            webSocket.add(decodeN);
+          }
+          setState(() {});
         }
 
-        print("Content Length: ${contentLength}, chunks: ${chunks.length}");
+        print("===============================Content Length: ${contentLength}, chunks: ${chunks.length}");
       });
 
     }
@@ -201,7 +227,8 @@ class _WebSocketCheckSumsState extends State<WebSocketCheckSums> {
                     onPressed: (){
                       stopBtn = "Start";
                       // print(InternetAddress.loopbackIPv4);
-                      webSocket.add('STOPREC');
+                      // webSocket.add('STOPREC');
+                      crcHash();
                       setState(() {
                         // wifiName.text=InternetAddress.loopbackIPv4.address;
                       });
@@ -284,6 +311,14 @@ class _WebSocketCheckSumsState extends State<WebSocketCheckSums> {
     });
 
     setState(() {});
+  }
+
+  crcHash () {
+    String input = "Hello, world!"; // String to calculate CRC32 checksum for
+
+    var CRCchecksum = Crc32.calculate(input);
+
+    print('00000000000000000000000000000....${CRCchecksum}....000000000000000000000000000000000000');
   }
 
 }

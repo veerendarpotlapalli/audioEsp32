@@ -11,6 +11,7 @@ import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vsaudio/BluetoothDeviceListEntry.dart';
+import 'package:vsaudio/blutoothBLE.dart';
 import 'package:vsaudio/webSocketStreamSave.dart';
 import 'package:vsaudio/detailPageSample.dart';
 import 'package:vsaudio/http_web.dart';
@@ -39,9 +40,11 @@ final wifiName = "okay";
   Widget build(BuildContext context) {
     return MaterialApp(
       // home: HomePage(), //bluetooth,websocket,smartConfig
-      home: WebSocketStreamSave(), //websocket stream and save
+      // home: WebSocketStreamSave(), //websocket stream and save
       // home: httpWeb(), //http,web
-      // home: WebSocketCheckSums(wifiName: wifiName,), //web socket stream and save with check sums
+      // home: WebSocketCheckSums(), //web socket stream and save with check sums
+      home: BluetoothBLE(), // Bluetooth ble connectivity
+
 
       debugShowCheckedModeBanner: false,
     );
@@ -192,30 +195,32 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
 
   void _startCameraConnect(BuildContext context, BluetoothDevice server) {
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      return DetailPageSample(server: server);
+      return DetailPageSample(server: server);   // smart config , bluetooth Connection , websocket
+      // return DetailPage(server: server);   // blutooth EDR
+
     }));
   }
 
 
-  void saveAudioStream(String url, String outputFile) async {
-
-    print("***************##########@@@@@@@@@@@@@@@#$outputFile");
-    print("***************##########@@@@@@@@@@@@@@@#$url");
-
-    final arguments = ['-i', url, '-c', 'copy', outputFile];
-
-    await FFmpegKit.execute(arguments.toString()).then((session) async {
-      final returnCode = await session.getReturnCode();
-      if(ReturnCode.isSuccess(returnCode)) {
-        print('ewwwwwwwwwwwwwwwwwwwwww');
-      } else if(ReturnCode.isCancel(returnCode)) {
-        print('*************canceled**************');
-      } else {
-        print('###########error#############');
-      }
-    });
-
-  }
+  // void saveAudioStream(String url, String outputFile) async {
+  //
+  //   print("***************##########@@@@@@@@@@@@@@@#$outputFile");
+  //   print("***************##########@@@@@@@@@@@@@@@#$url");
+  //
+  //   final arguments = ['-i', url, '-c', 'copy', outputFile];
+  //
+  //   await FFmpegKit.execute(arguments.toString()).then((session) async {
+  //     final returnCode = await session.getReturnCode();
+  //     if(ReturnCode.isSuccess(returnCode)) {
+  //       print('ewwwwwwwwwwwwwwwwwwwwww');
+  //     } else if(ReturnCode.isCancel(returnCode)) {
+  //       print('*************canceled**************');
+  //     } else {
+  //       print('###########error#############');
+  //     }
+  //   });
+  //
+  // }
 
 
 
