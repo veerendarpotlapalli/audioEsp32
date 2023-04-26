@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 import 'dart:async';
+import 'package:flutter/services.dart';
 
 
 import 'package:audioplayers/audioplayers.dart';
@@ -27,6 +28,17 @@ import 'package:ffmpeg_kit_flutter/level.dart';
 import 'package:ffmpeg_kit_flutter/log.dart';
 
 void main() {
+
+  // SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+  //   statusBarColor: Colors.lightBlueAccent,
+  //   systemNavigationBarColor: Colors.lightBlueAccent,
+  // ));
+
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]);
+
   runApp(MyApp());
 }
 
@@ -47,6 +59,13 @@ final wifiName = "okay";
 
 
       debugShowCheckedModeBanner: false,
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSwatch().copyWith(
+          primary: Colors.black38,
+        ),
+        scaffoldBackgroundColor: Colors.white,
+        // buttonColor: Colors.waggon,
+      ),
     );
   }
 }

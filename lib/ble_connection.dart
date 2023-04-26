@@ -1,24 +1,35 @@
 import 'dart:async';
-import 'dart:convert' show utf8;
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
-import 'package:app_settings/app_settings.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:vsaudio/ble_connection.dart';
 import 'package:vsaudio/webSocketStreamSave.dart';
 
-class BluetoothBLE extends StatefulWidget {
 
+class BLEConnection extends StatefulWidget {
+
+  final BluetoothDevice? device;
+
+  BLEConnection({this.device});
 
   @override
-  _BluetoothBLEState createState() => _BluetoothBLEState();
+  _BLEConnectionState createState() => _BLEConnectionState();
+
 }
 
-class _BluetoothBLEState extends State<BluetoothBLE> {
+class _BLEConnectionState extends State<BLEConnection> {
+
+  bool isConnecting = true;
+  List<String> wifiList=[];
+
+  // bool get isConnected => connection != null && connection!.isConnected;
+  bool isDisconnecting = false;
+
 
   TextEditingController password=TextEditingController();
 
@@ -29,7 +40,6 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
   FlutterBluePlus  flutterBluePlus = FlutterBluePlus .instance;
   late List<BluetoothDevice> pairedDevices = [];
   late List<BluetoothDevice> connectedDevice = [];
-  List<String> wifiList=[];
   final info = NetworkInfo();
 
   late String wifiName ;
@@ -56,11 +66,14 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
     super.initState();
 
     deviceConnection();
+    connectToDevice();
+
     // dataReceive();
 
     // startScan();
 
   }
+
 
   deviceConnection() async {
 
@@ -102,9 +115,14 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
 
 
   connectToDevice() async {
-    if (targetDevice == null) {
-      return;
-    }
+
+    ipAdd = (await info.getWifiIP())!;
+    print('############################$ipAdd################################');
+
+
+    targetDevice = widget.device;
+
+    print('++++++++++++++++++++++++++$targetDevice+++++++++++++++++++++++++++++++++++++++');
 
     setState(() {
       connectionText = "Device Connecting";
@@ -118,6 +136,7 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
         discoverServices();
       } else {
         await targetDevice!.connect();
+        discoverServices();
       }
     });
 
@@ -147,23 +166,40 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
     if (targetDevice == null) {
       return;
     }
-      List<BluetoothService> services = await targetDevice!.discoverServices();
-      services.forEach((service) {
-        if (service.uuid.toString() == SERVICE_UUID) {
-          service.characteristics.forEach((characteristics) {
-            if (characteristics.uuid.toString() == CHARACTERISTIC_UUID) {
-              targetCharacteristic = characteristics;
-              setState(() {
-                connectionText = "All Ready with ${targetDevice!.name}";
+
+
+    List<BluetoothService> services = await targetDevice!.discoverServices();
+    services.forEach((service) {
+      if (service.uuid.toString() == SERVICE_UUID) {
+        service.characteristics.forEach((characteristics) {
+          if (characteristics.uuid.toString() == CHARACTERISTIC_UUID) {
+            targetCharacteristic = characteristics;
+            if(targetCharacteristic!.properties.notify) {
+
+              targetCharacteristic!.setNotifyValue(true);
+              targetCharacteristic!.value.listen((value) {
+                // handle incoming data
+
+                List<int> charCodes = value;
+
+                var list = new String.fromCharCodes(charCodes);
+
+                print("***********************Data received: ${list}**********************");
               });
+
+
+            } else {
+              print('............................SORRY............................');
             }
-          });
-        }
-      });
+            // setState(() {
+            //   connectionText = "All Ready with ${targetDevice!.name}";
+            // });
+          }
+        });
+      }
+    });
 
     print('====================${targetDevice!.name}===========================');
-    writeData('OKAY');
-
 
 
   }
@@ -172,36 +208,59 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
     if (targetCharacteristic == null) return;
 
     List<int> bytes = utf8.encode(data);
-    await targetCharacteristic!.write(bytes);
+    await targetCharacteristic!.write(bytes,withoutResponse: true);
 
-    List<int> value = await targetCharacteristic!.read();
-    String message = String.fromCharCodes(value);
+    // List<int> value = await targetCharacteristic!.read();
+    // String message = String.fromCharCodes(value);
+    //
+    // print('^^^^^^^^^^^^^^^^^^^^^^^^^${message}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 
-    print('^^^^^^^^^^^^^^^^^^^^^^^^^${message}^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+    if(data == "SCAN") {
 
-    // Stream<List<int>> stream = targetCharacteristic!.setNotifyValue(true) as Stream<List<int>>;
-    // stream.listen((value) {
-    //   print('<<<<<<<<<<<<<<<<<<<<<<<<<$value<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
-    // });
+      if(wifiList.isEmpty) {
+        Uint8List? value = (await targetCharacteristic!.read()) as Uint8List?;
+
+        dataReceive(value!);
+      } else {
+        Fluttertoast.showToast(msg: "...........");
+      }
+
+
+    }
+
+    if(data == "PWD:$passcode") {
+      return writeData("IP:$ipAdd");
+    }
+
+    if(data =='WS_INIT') {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WebSocketStreamSave()));
+    }
 
     setState(() {});
 
   }
 
 
-  dataReceive() async {
+  dataReceive(Uint8List data) async {
 
     setState(() {});
 
-    List<int> value = await targetCharacteristic!.read();
-    print('^^^^^^^^^^^^^^^^^^^^^^^^^$value^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+    // List<int> value = await targetCharacteristic!.read();
+    print('^^^^^^^^^^^^^^^^^^^^^^^^^$data^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 
-    Stream<List<int>> stream = targetCharacteristic!.setNotifyValue(true) as Stream<List<int>>;
-    stream.listen((value) {
-      print('<<<<<<<<<<<<<<<<<<<<<<<<<$value<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<');
+    List<int> charCodes = data;
+    print(new String.fromCharCodes(charCodes));
+
+    data.forEach((element) {
+      if(element!=10) {
+        ch += String.fromCharCode(element);
+      }else{
+        setState(() {
+          wifiList.add(ch);
+          ch = '';
+        });
+      }
     });
-
-    setState(() {});
 
   }
 
@@ -212,134 +271,73 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
     disconnectFromDeivce();
   }
 
-  submitAction() {
-    var wifiData = '${wifiNameController.text},${wifiPasswordController.text}';
-    writeData(wifiData);
-  }
-
-  TextEditingController wifiNameController = TextEditingController();
-  TextEditingController wifiPasswordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("ESP32 Voice Recorder"),
-      ),
-      body: Container(
-        child: Column(
-          children: <Widget>[
-            // SwitchListTile(
-            //   title: Text('Enable Bluetooth'),
-            //   value: _bluetoothState.isEnabled,
-            //   onChanged: (bool value) {
-            //     future() async {
-            //       if (value) {
-            //         await FlutterBluetoothSerial.instance.requestEnable();
-            //       } else {
-            //         await FlutterBluetoothSerial.instance.requestDisable();
-            //       }
-            //       future().then((_) {
-            //         setState(() {});
-            //       });
-            //     }
-            //   },
-            // ),
-            ListTile(
-              leading: IconButton(
-                  onPressed: () {
-                    setState(() {});
-                  },
-                  icon: Icon(Icons.refresh)),
-              title: Text("Bluetooth STATUS"),
-              subtitle: Text('hello'),
-              trailing: ElevatedButton(
-                child: Text("Settings"),
-                onPressed: () async {
-
-                  AppSettings.openBluetoothSettings();
-
-                  setState(() {});
-
-                },
-              ),
-            ),
-
-            Expanded(
+        body: SafeArea(
+          child: Column(
+            children: <Widget>[
+              shotButton(),
+              Expanded(
                 child: ListView.builder(
-                  itemCount: pairedDevices.length,
-                  itemBuilder: (BuildContext context, int index) {
-                    final device = pairedDevices[index];
-                    TARGET_DEVICE_NAME = device.name;
-                    return ListTile(
-                      title: Text(device.name),
-                      subtitle: Text(device.id.toString()),
-                      onTap: () {
+                  itemCount: wifiList.length,
+                  itemBuilder: (context,index){
+                    return SafeArea(
+                      child: ListTile(
+                        title: Text(wifiList[index]),
+                        leading: Icon(Icons.wifi),
+                        onTap: (){
+                          ConnecttoWifiPopUp(index);
 
-                        print('+++++++++++++++${TARGET_DEVICE_NAME}+++++++++++++++++++++');
-                        targetDevice = device;
-                        targetDevice!.requestMtu(mtuSize);
+                          writeData("SSID:${wifiList[index].toString()}");
 
-                        print('((((((($mtuSize(((((((');
+                          // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>ConnectToWifi(wifiName: e,)));
+                        },
 
-                        // connectToDevice();
-
-                        startConnection(context,device);
-
-                        // targetDevice = device;
-                        // print('^^^^^^^^^^^^^^^^^^^${targetDevice}^^^^^^^^^^^^^^^^^^^^^^^^^');
-
-                        // connectToDevice();
-
-                        // writeData('OKAY');
-
-                        // print('........................okay.........................');
-                        // Do something when the user taps on a device
-                      },
-                      onLongPress: () {
-                        StreamSubscription<BluetoothDeviceState> subscriptions;
-
-                        subscriptions = targetDevice!.state.listen((state) async {
-
-                          if (state == BluetoothDeviceState.connected) {
-                            await targetDevice!.disconnect();
-                          } else {
-                            setState(() {});
-                          }
-                        });
-                        Fluttertoast.showToast(msg: 'Device Disconnected...');
-                      },
+                      ),
                     );
                   },
+
+                ),
+              ),
+
+            ],
+          )
+        ));
+  }
+
+
+  Widget shotButton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: ElevatedButton(
+        style: ButtonStyle(
+            shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(18.0),
                 )
-
             )
-
-
-
-    // Expanded(
-            //   child: ListView(
-            //     children: devices
-            //         .map((_device) =>
-            //         BluetoothDeviceListEntry(
-            //           device: _device,
-            //           enabled: true,
-            //           onTap: () {
-            //             print("Item");
-            //             _startCameraConnect(context, _device);
-            //           },
-            //         ))
-            //         .toList(),
-            //   ),
-            // )
-
-
-
-          ],
         ),
+        onPressed: () async {
+
+            writeData("SCAN");
+
+          // var url = Uri.parse('http://192.168.4.1/');
+          // await launchUrl(url);
+
+        },
+        child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Text(
+          'SCAN',
+          style: const TextStyle(fontSize: 24),
+        ),
+      ),
       ),
     );
   }
+
 
 
   ConnecttoWifiPopUp(int index){
@@ -404,13 +402,22 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
                                     // ws.add('START') ;
                                     passcode = password.text.toString();
                                     // ipAdd = await info.getWifiIP().toString();
+
                                     writeData("PWD:$passcode");
-                                    writeData("IP:$ipAdd");
-                                    print("****************####################@@@@@@@@@@@@@@@");
+                                    print("****************####### $ipAdd #############@@@@@@@@@@@@@@@");
                                     print(InternetAddress.loopbackIPv4);
                                     // Navigator.of(context).pop();
                                     // wifiConnection == "WIFI:CONNECTED" ?
-                                    Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WebSocketStreamSave()));
+
+                                    // List<int> value = await targetCharacteristic!.read();
+                                    // print('^^^^^^^^^^^^^^^^^^^^^^^^^$value^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+                                    // List<int> charCodes = value;
+                                    // print(new String.fromCharCodes(charCodes));
+                                    // print('^^^^^^^^^^^^^^^^^^^^^^^^^$value^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
+
+                                    showWebSocketConformation();
+
+                                    // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WebSocketStreamSave()));
                                     // CircularProgressIndicator();
                                     // _showWIFIRecordingDialog();
                                     // _showRecordingDialog();
@@ -457,12 +464,32 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
 
   }
 
- void startConnection(BuildContext context, BluetoothDevice server){
-   Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-     return BLEConnection(device: server);   // smart config , bluetooth Connection , websocket
-     // return DetailPage(server: server);   // blutooth EDR
 
-   }));
- }
+  showWebSocketConformation() {
+    showCupertinoDialog<String>(
+      context : context,
+      builder: (BuildContext context) =>
+          CupertinoAlertDialog(
+            title: const Text("Confirm"),
+            content: const Text("Are you sure you want to Stream.... "),
+            actions: <Widget>[
+              TextButton(onPressed: () async {
+                // Fluttertoast.showToast(msg: "App");
+                Navigator.pop(context);
+              },
+                child: const Text("No"),
+              ),
+              TextButton(onPressed: () async {
+                writeData("WS_INIT");
+              },
+                child: const Text("Yes"),
+              ),
+            ],
+          ),
+
+    ); //showCupertinoDialog
+
+  }
+
 
 }
