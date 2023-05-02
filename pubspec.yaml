@@ -57,6 +57,7 @@ dependencies:
 
   flutter_blue_plus: ^1.4.0
   app_settings: ^4.2.0
+  get: ^4.6.5
 #  flutter_blue: ^0.8.0
 
 

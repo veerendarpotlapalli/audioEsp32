@@ -12,6 +12,7 @@ import 'package:flutter_bluetooth_seria_changed/flutter_bluetooth_serial.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:vsaudio/BluetoothDeviceListEntry.dart';
+import 'package:vsaudio/bluetoothBLESettings.dart';
 import 'package:vsaudio/blutoothBLE.dart';
 import 'package:vsaudio/webSocketStreamSave.dart';
 import 'package:vsaudio/detailPageSample.dart';
@@ -55,7 +56,10 @@ final wifiName = "okay";
       // home: WebSocketStreamSave(), //websocket stream and save
       // home: httpWeb(), //http,web
       // home: WebSocketCheckSums(), //web socket stream and save with check sums
-      home: BluetoothBLE(), // Bluetooth ble connectivity
+      home: BluetoothBLE(), // Bluetooth ble in app connectivity
+      // home: BluetoothBLeSettings(), // Bluetooth ble in settings connectivity
+
+
 
 
       debugShowCheckedModeBanner: false,
