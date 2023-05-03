@@ -143,6 +143,15 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
     // TODO: implement initState
     super.initState();
   }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    webSocket.add("WS_EXIT");
+  }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -228,6 +237,50 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
                     },
                     child:Text('Stop',style: TextStyle(color: Colors.white),)),
               ),
+
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    ElevatedButton(
+                        onPressed: () {
+                          webSocket.add("LP_250");
+                        },
+                        child: Text('LP_250'),
+                    ),
+                    SizedBox(width: 50,),
+                    ElevatedButton(
+                      onPressed: () {
+                        webSocket.add("LP_2500");
+                      },
+                      child: Text('LP_2500'),
+                    ),
+                  ],
+                ),
+              ),
+
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                      IconButton(
+                          onPressed: (){
+                        webSocket.add("VOL+");
+
+                      },
+                          icon: Icon(Icons.volume_up)),
+                    SizedBox(width: 50,),
+
+                    IconButton(
+                          onPressed: (){
+                            webSocket.add("VOL-");
+                          },
+                          icon: Icon(Icons.volume_down)),
+                  ],
+                ),
+              ),
+
+
               Expanded(
                 child: ListView(
                   children: files.map((_file) => FileEntityListTile(

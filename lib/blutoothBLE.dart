@@ -50,7 +50,7 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
   void initState() {
     super.initState();
 
-    // deviceConnection();
+    deviceConnection();
     // dataReceive();
 
 
@@ -63,7 +63,7 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
 
     pairedDevices = await flutterBluePlus.bondedDevices;
     setState(() {});
-    // connectedDevice = await flutterBluePlus.connectedDevices;
+    connectedDevice = await flutterBluePlus.connectedDevices;
 
   }
 
@@ -235,7 +235,7 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
                             // connectToDevice();
 
                             device.connect();
-                              await device.requestMtu(mtuSize);
+                            await device.requestMtu(mtuSize);
                             startConnection(context,device);
 
                           },
@@ -332,6 +332,7 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
 
                                       device.connect();
                                       // device.requestMtu(mtuSize);
+                                      print('______________________________${connectedDevice}________________________________');
                                       startConnection(context,device);
 
                                     },
@@ -471,12 +472,21 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
   //
   // }
 
- void startConnection(BuildContext context, BluetoothDevice server){
-   Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-     return BLEConnection(device: server);   // smart config , bluetooth Connection , websocket
-     // return DetailPage(server: server);   // blutooth EDR
+ void startConnection(BuildContext context, BluetoothDevice server) async {
 
-   }));
+
+    bool isConnected = connectedDevice.contains(server);
+    int mtu = await server.requestMtu(mtuSize);
+
+    if(isConnected == true && mtu == 512) {
+      Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+        return BLEConnection(device: server);   // smart config , bluetooth Connection , websocket
+        // return DetailPage(server: server);   // blutooth EDR
+
+      }));
+
+    }
+
  }
 
 }
