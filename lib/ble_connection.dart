@@ -252,8 +252,8 @@ class _BLEConnectionState extends State<BLEConnection> {
     } else if(data == "PWD:$passcode") {
       List<int> bytes = utf8.encode(data);
       await targetCharacteristic!.write(bytes,withoutResponse: true);
+      // writeData("IP:$ipAdd");
 
-      return writeData("IP:$ipAdd");
     } else if(data =='WS_INIT') {
       List<int> bytes = utf8.encode(data);
       await targetCharacteristic!.write(bytes,withoutResponse: true);
@@ -446,6 +446,8 @@ class _BLEConnectionState extends State<BLEConnection> {
 
                                     writeData("PWD:$passcode");
                                     print("****************####### $ipAdd #############@@@@@@@@@@@@@@@");
+                                    // writeData("IP:$ipAdd");
+
                                     print(InternetAddress.loopbackIPv4);
                                     // Navigator.of(context).pop();
                                     // wifiConnection == "WIFI:CONNECTED" ?
@@ -456,7 +458,8 @@ class _BLEConnectionState extends State<BLEConnection> {
                                     // print(new String.fromCharCodes(charCodes));
                                     // print('^^^^^^^^^^^^^^^^^^^^^^^^^$value^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
 
-                                    showWebSocketConformation();
+                                    // showWebSocketConformation();
+                                    gotoWebSocket();
 
                                     // Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WebSocketStreamSave()));
                                     // CircularProgressIndicator();
@@ -548,10 +551,13 @@ class _BLEConnectionState extends State<BLEConnection> {
 
         String data = new String.fromCharCodes(charCodes);
 
-        if(data == "WS_CONNECTED") {
-          Navigator.of(context).push(MaterialPageRoute(builder: (context)=>WebSocketStreamSave()));
-        } else if (data == "WS_NOTCONNECTED") {
-          CircularProgressIndicator();
+        print('***************************************$data*****************************************');
+
+        if(data == "WIFI_CONNECTED") {
+          writeData("IP:$ipAdd");
+          showWebSocketConformation();
+        } else if (data == "WIFI_NOT_CONNECTED") {
+          Fluttertoast.showToast(msg: 'wifi not connected');
         } else {
           CircularProgressIndicator();
         }

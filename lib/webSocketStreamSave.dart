@@ -16,7 +16,8 @@ import 'file_entity_list_tile.dart';
 import 'package:network_info_plus/network_info_plus.dart';
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-
+import 'package:animated_toggle_switch/animated_toggle_switch.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
 // import 'detailpage.dart';
@@ -55,6 +56,7 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
   final info=NetworkInfo();
 
   String stopBtn = "Start";
+
 
   _completeByte() async {
     if (chunks.isEmpty || contentLength == 0) return;
@@ -101,21 +103,30 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
       webSocket = await WebSocketTransformer.upgrade(request);
       print('WebSocket request received');
       webSocket.listen((message) {
-        print('Received message: $message');
-        Uint8List data=message as Uint8List;
-        if (data.isNotEmpty) {
-          chunks.add(data);
-          // var arr = _bytes!.buffer.asUint8List(data as int);
-          streamPlayer.foodSink!.add(FoodData(data));
+        print('========================Received message: $message =============================');
 
-          setState(() {
-            contentLength += data.length;
-            _timer!.reset();
+        if(message is String) {
+          String wsdata = message;
+          if(wsdata == "WS_CONNECTED") {
+            Fluttertoast.showToast(msg: "WEB SOCKET CONNECTED...");
+          }
+        } else {
 
-            // streamData.add(data);
-          });
+          Uint8List data=message as Uint8List;
+          if (data.isNotEmpty) {
+            chunks.add(data);
+            // var arr = _bytes!.buffer.asUint8List(data as int);
+            streamPlayer.foodSink!.add(FoodData(data));
+
+            setState(() {
+              contentLength += data.length;
+              _timer!.reset();
+
+              // streamData.add(data);
+            });
+          }
+
         }
-
         print("Content Length: ${contentLength}, chunks: ${chunks.length}");
       });
     }
@@ -238,26 +249,56 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
                     child:Text('Stop',style: TextStyle(color: Colors.white),)),
               ),
 
-              Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: Row(
-                  children: [
-                    ElevatedButton(
-                        onPressed: () {
-                          webSocket.add("LP_250");
-                        },
-                        child: Text('LP_250'),
-                    ),
-                    SizedBox(width: 50,),
-                    ElevatedButton(
-                      onPressed: () {
-                        webSocket.add("LP_2500");
-                      },
-                      child: Text('LP_2500'),
-                    ),
-                  ],
+              SizedBox(height: 50,),
+
+              Center(
+                child: ToggleSwitch(
+                  minWidth: 100,
+                  minHeight: 40,
+                  cornerRadius: 20,
+                  fontSize: 17,
+                  activeBgColor: [Colors.black38],
+                  activeFgColor: Colors.white,
+                  inactiveBgColor: Colors.white38,
+                  inactiveFgColor: Colors.grey,
+                  totalSwitches: 3,
+                  labels: ['OFF','LP_250','LP_2500'],
+                  onToggle: (index) {
+                    if(index == 0) {
+                      webSocket.add("LP_OFF");
+                      print('======================  LP_250 ========================');
+                    } else if (index == 1) {
+                      webSocket.add("LP_250");
+                      print('======================  LP_25000000000 ========================');
+                    } else if (index == 2) {
+                      webSocket.add('LP_2500');
+                      print('======================  LP_OFF ========================');
+
+                    }
+                  },
                 ),
               ),
+
+              // Padding(
+              //   padding: const EdgeInsets.all(20.0),
+              //   child: Row(
+              //     children: [
+              //       ElevatedButton(
+              //           onPressed: () {
+              //             webSocket.add("LP_250");
+              //           },
+              //           child: Text('LP_250'),
+              //       ),
+              //       SizedBox(width: 50,),
+              //       ElevatedButton(
+              //         onPressed: () {
+              //           webSocket.add("LP_2500");
+              //         },
+              //         child: Text('LP_2500'),
+              //       ),
+              //     ],
+              //   ),
+              // ),
 
               Padding(
                 padding: const EdgeInsets.all(20.0),

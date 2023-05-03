@@ -476,16 +476,22 @@ class _BluetoothBLEState extends State<BluetoothBLE> {
 
 
     bool isConnected = connectedDevice.contains(server);
-    int mtu = await server.requestMtu(mtuSize);
 
-    if(isConnected == true && mtu == 512) {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-        return BLEConnection(device: server);   // smart config , bluetooth Connection , websocket
-        // return DetailPage(server: server);   // blutooth EDR
+    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+      return BLEConnection(device: server);   // smart config , bluetooth Connection , websocket
+      // return DetailPage(server: server);   // blutooth EDR
 
-      }));
+    }));
 
-    }
+
+   // if(isConnected == true) {
+    //   Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+    //     return BLEConnection(device: server);   // smart config , bluetooth Connection , websocket
+    //     // return DetailPage(server: server);   // blutooth EDR
+    //
+    //   }));
+    //
+    // }
 
  }
 
