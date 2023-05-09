@@ -60,6 +60,8 @@ dependencies:
   get: ^4.6.5
   animated_toggle_switch: ^0.6.2
   toggle_switch: ^2.1.0
+  connectivity_plus: ^3.0.6
+
 #  flutter_blue: ^0.8.0
 
 

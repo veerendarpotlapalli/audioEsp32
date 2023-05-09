@@ -266,13 +266,17 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
                   onToggle: (index) {
                     if(index == 0) {
                       webSocket.add("LP_OFF");
-                      print('======================  LP_250 ========================');
+                      print('======================  LP_OFF ========================');
+                      Fluttertoast.showToast(msg: 'LP_OFF');
                     } else if (index == 1) {
                       webSocket.add("LP_250");
-                      print('======================  LP_25000000000 ========================');
+                      print('======================  LP_250 ========================');
+                      Fluttertoast.showToast(msg: 'LP_250');
+
                     } else if (index == 2) {
                       webSocket.add('LP_2500');
-                      print('======================  LP_OFF ========================');
+                      print('======================  LP_2500 ========================');
+                      Fluttertoast.showToast(msg: 'LP_2500');
 
                     }
                   },

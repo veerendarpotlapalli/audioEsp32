@@ -3,11 +3,13 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:network_info_plus/network_info_plus.dart';
+import 'package:toggle_switch/toggle_switch.dart';
 import 'package:vsaudio/webSocketStreamSave.dart';
 
 
@@ -66,6 +68,9 @@ class _BLEConnectionState extends State<BLEConnection> {
     super.initState();
 
     // deviceConnection();
+
+    // hotspotConnection();
+
     connectToDevice();
 
     // dataReceive();
@@ -116,9 +121,12 @@ class _BLEConnectionState extends State<BLEConnection> {
 
   connectToDevice() async {
 
-    ipAdd = (await info.getWifiIP())!;
-    print('############################$ipAdd################################');
-
+    try{
+      ipAdd = (await info.getWifiIP())!;
+      print('############################$ipAdd################################');
+    }catch (e) {
+      print('.......................................Wifi is disabled...');
+    }
 
     targetDevice = widget.device;
 
@@ -148,6 +156,12 @@ class _BLEConnectionState extends State<BLEConnection> {
     // discoverServices();
   }
 
+
+  hotspotConnection () async {
+    print('hi');
+    var hotName = await info.getWifiName();
+    print(':::::::::::::::::::::::::::::::::::::::$hotName::::::::::::::::::::::::::::::::::::::::::::::::::::');
+  }
 
   disconnectFromDeivce() {
     if (targetDevice == null) {
@@ -320,6 +334,59 @@ class _BLEConnectionState extends State<BLEConnection> {
           child: Column(
             children: <Widget>[
               shotButton(),
+
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Center(
+                  child: ToggleSwitch(
+                    minWidth: 100,
+                    minHeight: 40,
+                    cornerRadius: 20,
+                    fontSize: 17,
+                    activeBgColor: [Colors.black38],
+                    activeFgColor: Colors.white,
+                    inactiveBgColor: Colors.white38,
+                    inactiveFgColor: Colors.grey,
+                    totalSwitches: 3,
+                    labels: ['OFF','LP_250','LP_2500'],
+                    onToggle: (index) {
+                      if(index == 0) {
+                        writeData("LP_OFF");
+
+                      } else if (index == 1) {
+                        writeData("LP_250");
+
+                      } else if (index == 2) {
+                        writeData('LP_2500');
+
+                      }
+                    },
+                  ),
+                ),
+              ),
+
+
+              Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Row(
+                  children: [
+                    IconButton(
+                        onPressed: (){
+                          writeData("VOL+");
+
+                        },
+                        icon: Icon(Icons.volume_up)),
+                    SizedBox(width: 50,),
+
+                    IconButton(
+                        onPressed: (){
+                          writeData("VOL-");
+                        },
+                        icon: Icon(Icons.volume_down)),
+                  ],
+                ),
+              ),
+
               Expanded(
                   child: ListView.builder(
                     itemCount: wifiList.length,
