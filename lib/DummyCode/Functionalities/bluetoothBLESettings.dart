@@ -1,15 +1,13 @@
 import 'dart:async';
 import 'dart:convert' show utf8;
 import 'dart:io';
-
 import 'package:app_settings/app_settings.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:url_launcher/url_launcher.dart';
-import 'package:vsaudio/ble_connection.dart';
-import 'package:vsaudio/webSocketStreamSave.dart';
+import '../../Bluetooth BLE  Websocket/ble_connection.dart';
+import '../../Bluetooth BLE  Websocket/webSocketStreamSave.dart';
 
 class BluetoothBLeSettings extends StatefulWidget {
 

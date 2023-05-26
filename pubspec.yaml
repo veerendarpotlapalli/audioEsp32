@@ -48,7 +48,7 @@ dependencies:
   network_info_plus: ^3.0.2
   showcaseview: ^2.0.3
   fluttertoast: ^8.2.1
-  share_plus: ^6.3.2
+  share_plus: ^7.0.1
   file_picker: ^5.2.9
   webview_flutter: ^4.0.7
   url_launcher: ^6.1.10
@@ -61,6 +61,7 @@ dependencies:
   animated_toggle_switch: ^0.6.2
   toggle_switch: ^2.1.0
   connectivity_plus: ^3.0.6
+  device_info_plus: ^9.0.1
 
 #  flutter_blue: ^0.8.0
 

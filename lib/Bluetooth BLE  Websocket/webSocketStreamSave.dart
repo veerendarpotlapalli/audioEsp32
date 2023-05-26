@@ -1,26 +1,17 @@
 import 'dart:io';
 import 'dart:typed_data';
-
 import 'package:flutter_sound/flutter_sound.dart';
-
 import 'package:async/async.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:slide_popup_dialog_null_safety/slide_popup_dialog.dart' as slideDialog;
-import 'package:url_launcher/url_launcher.dart';
-import 'package:vsaudio/wav_header.dart';
 import 'file_entity_list_tile.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-import 'package:web_socket_channel/io.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:animated_toggle_switch/animated_toggle_switch.dart';
 import 'package:toggle_switch/toggle_switch.dart';
-import 'package:webview_flutter/webview_flutter.dart';
+import 'wav_header.dart';
 
-// import 'detailpage.dart';
 
 class WebSocketStreamSave extends StatefulWidget {
   late String wifiName;
@@ -35,26 +26,18 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
   TextEditingController password=TextEditingController();
   late WebSocket webSocket;
   bool isConnecting = true;
-
   bool isDisconnecting = false;
-
   List<List<int>> chunks = <List<int>>[];
   int contentLength = 0;
   Uint8List? _bytes;
-  // PlayerController controller = PlayerController();// Initialise
-
   RestartableTimer? _timer;
-  // RecordState _recordState = RecordState.stopped;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
   Uint8List? dataStream;
-
   List<FileSystemEntity> files = <FileSystemEntity>[];
   String? selectedFilePath;
   final player = FlutterSoundPlayer(voiceProcessing: true);
   final streamPlayer = FlutterSoundPlayer(voiceProcessing: true);
-
   final info=NetworkInfo();
-
   String stopBtn = "Start";
 
 
@@ -90,16 +73,9 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
   void createChannel()async{
     password.text= (await info.getWifiIP())!;
     print(await info.getWifiIP());
-    // final server = await ServerSocket.bind(InternetAddress.loopbackIPv4, 8080);
-    // server.listen((event) {
-    //   event.listen((data) {
-    //
-    //   });
-    // });
-    final server2 = await HttpServer.bind(InternetAddress.anyIPv4,8080);
-    print('Server running on port ${server2.port}');
-
-    await for (HttpRequest request in server2) {
+    final server = await HttpServer.bind(InternetAddress.anyIPv4,8080);
+    print('Server running on port ${server.port}');
+    await for (HttpRequest request in server) {
       webSocket = await WebSocketTransformer.upgrade(request);
       print('WebSocket request received');
       webSocket.listen((message) {
@@ -115,14 +91,10 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
           Uint8List data=message as Uint8List;
           if (data.isNotEmpty) {
             chunks.add(data);
-            // var arr = _bytes!.buffer.asUint8List(data as int);
             streamPlayer.foodSink!.add(FoodData(data));
-
             setState(() {
               contentLength += data.length;
               _timer!.reset();
-
-              // streamData.add(data);
             });
           }
 
@@ -179,58 +151,17 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
 
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-              //   child: SizedBox(
-              //       width: MediaQuery.of(context).size.width*0.8,
-              //       child:Row(
-              //         mainAxisAlignment: MainAxisAlignment.start,
-              //         children: [
-              //           SizedBox(width: 10,),
-              //           Icon(Icons.wifi),
-              //           SizedBox(width: 10,),
-              //           Text(widget.wifiName,style: TextStyle(color: Colors.black,fontSize: 16),)
-              //         ],
-              //       )
-              //   ),
-              // ),
-              // Padding(
-              //   padding: const EdgeInsets.symmetric(vertical: 8.0,horizontal: 16),
-              //   child: SizedBox(
-              //     width: MediaQuery.of(context).size.width*0.8,
-              //     child: TextField(
-              //       controller: password,
-              //       decoration: InputDecoration(
-              //           hoverColor: Colors.black,
-              //           prefixIcon: Icon(Icons.key),
-              //           hintText: 'Enter Password'
-              //       ),
-              //       style: TextStyle(color: Colors.black),
-              //       keyboardType: TextInputType.text,
-              //     ),
-              //   ),
-              // ),
-              // SizedBox(
-              //   height: 20,
-              // ),
-
               SizedBox(
                 width: MediaQuery.of(context).size.width*0.4,
                 child: TextButton(
                     style: ButtonStyle(backgroundColor: MaterialStatePropertyAll<Color>(Colors.blue)),
                     onPressed: () async {
 
-                      // ipWebView();
-
-                      // var url = Uri.parse('http://192.168.4.1/');
-                      //   await launchUrl(url);
-
                       stopBtn = "Recording...";
                       webSocket.add('STARTREC');
                       print(InternetAddress.loopbackIPv4);
-                      setState(() {
-                        // wifiName.text=InternetAddress.loopbackIPv4.address;
-                      });
+                      setState(() {});
+
                     },
                     child:Text(stopBtn,style: TextStyle(color: Colors.white),)),
               ),
@@ -242,9 +173,7 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
                       stopBtn = "Start";
                       webSocket.add('STOPREC');
                       print(InternetAddress.loopbackIPv4);
-                      setState(() {
-                        // wifiName.text=InternetAddress.loopbackIPv4.address;
-                      });
+                      setState(() {});
                     },
                     child:Text('Stop',style: TextStyle(color: Colors.white),)),
               ),
@@ -282,27 +211,6 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
                   },
                 ),
               ),
-
-              // Padding(
-              //   padding: const EdgeInsets.all(20.0),
-              //   child: Row(
-              //     children: [
-              //       ElevatedButton(
-              //           onPressed: () {
-              //             webSocket.add("LP_250");
-              //           },
-              //           child: Text('LP_250'),
-              //       ),
-              //       SizedBox(width: 50,),
-              //       ElevatedButton(
-              //         onPressed: () {
-              //           webSocket.add("LP_2500");
-              //         },
-              //         child: Text('LP_2500'),
-              //       ),
-              //     ],
-              //   ),
-              // ),
 
               Padding(
                 padding: const EdgeInsets.all(20.0),
@@ -402,17 +310,6 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
     });
 
     setState(() {});
-  }
-
-   ipWebView (){
-
-    return Scaffold(
-      body: WebViewWidget(controller: WebViewController()
-      ..loadRequest(Uri.parse('https://amazon.com')),
-
-    ),
-    );
-
   }
 
 }

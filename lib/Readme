@@ -1,0 +1,18 @@
+       Initially we are using Bluetooth BLE for smart configuration and WebSockets for Streaming.
+
+
+                                           Main
+                                            |
+                                            |
+            BluetoothBLE();  -->  To scan BLE devices and connecting to that specific Device
+                                            |
+                                            |
+            BLEConnection();  -->  we'll Scan available wifi devices and connecting to specific devices
+                                  by sending wifi name,password and IP Address to pebbl device.
+                                  - we can also apply filters and volume adjustments.
+                                            |
+                                            |
+            WebSocketStreamSave();  -->   Here we can Start Streaming and also we able to save the
+                                          Streaming audio as a file and play from the app itself from List.
+                                          - we can also apply filters and volume adjustments.
+                                          - dart files Wav_Header() and File_Entity_List() are used Here.

@@ -1,6 +1,7 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class httpWeb extends StatefulWidget {
   const httpWeb({Key? key}) : super(key: key);
@@ -19,14 +20,23 @@ class _httpWebState extends State<httpWeb> {
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          // crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             ElevatedButton(
                 onPressed: (){
                   playAudio();
                 },
-                child: Text("httpWeb PLAY")
+                child: Text("inApp PLAY")
             ),
+
+            SizedBox(height: 50,),
+
+            ElevatedButton(
+                onPressed: (){
+                  urlAudio();
+                },
+                child: Text("browser PLAY")
+            ),
+
           ],
         ),
       ),
@@ -35,13 +45,26 @@ class _httpWebState extends State<httpWeb> {
 
   playAudio () async {
 
-    var url = Uri.parse('http://192.168.4.1/');
-
     await audioPlayer.play(UrlSource('http://192.168.4.1/'));
 
-    // await launchUrl(url);
+  }
 
+  urlAudio () async {
+
+    var url = Uri.parse('http://192.168.4.1/');
+      await launchUrl (url);
 
   }
+
+  ipWebView (){
+
+    return Scaffold(
+      body: WebViewWidget(controller: WebViewController()
+        ..loadRequest(Uri.parse('https://amazon.com')),
+      ),
+    );
+
+  }
+
 
 }

@@ -11,8 +11,8 @@ import 'package:flutter_svprogresshud/flutter_svprogresshud.dart';
 import 'package:intl/intl.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:slide_popup_dialog_null_safety/slide_popup_dialog.dart' as slideDialog;
-import 'package:vsaudio/wav_header.dart';
-import 'file_entity_list_tile.dart';
+import 'package:vsaudio/Bluetooth%20Classic/file_entity_list_tile.dart';
+import 'package:vsaudio/Bluetooth%20Classic/wav_header.dart';
 
 enum RecordState { stopped, recording }
 enum Volume {up,down}
@@ -331,7 +331,6 @@ class _DetailPageState extends State<DetailPage> {
             )
         ),
         onPressed: () {
-          // streamPlayer.startPlayer(fromDataBuffer: dataStream,codec: Codec.pcm16);
           if (_recordState == RecordState.stopped) {
             _sendMessage("START");
             _showRecordingDialog();
@@ -397,8 +396,6 @@ class _DetailPageState extends State<DetailPage> {
                   onPressed: () {
 
                     _sendMessage("DOWN");
-                    // incdec("down");
-                    // print("*****  $num  *****");
 
                   },
                   child: Padding(
@@ -419,12 +416,6 @@ class _DetailPageState extends State<DetailPage> {
                         )
                     ),
                     onPressed: () {
-                      //
-                      // streamData.forEach((data) {
-                      //   Future.delayed(const Duration(milliseconds: 800),(){
-                      //     streamPlayer.foodSink!.add(FoodData(data));
-                      //   });
-                      // });
 
                       _sendMessage("STOP");
                       SVProgressHUD.showInfo(status: "Stopping...");
@@ -447,12 +438,7 @@ class _DetailPageState extends State<DetailPage> {
                     textStyle: TextStyle(color: Colors.white,fontSize: 23),
                   ), //styleFrom
                   onPressed: () {
-
                     _sendMessage("UP");
-                    // incdec("up");
-                    // print("*****  $num  *****");
-
-
                   },
                   child: Padding(
                     padding: const EdgeInsets.all(5),
