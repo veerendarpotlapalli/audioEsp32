@@ -74,7 +74,6 @@ class MyApp extends StatelessWidget {
           primary: Colors.black38,
         ),
         scaffoldBackgroundColor: Colors.white,
-        // buttonColor: Colors.waggon,
       ),
     );
   }

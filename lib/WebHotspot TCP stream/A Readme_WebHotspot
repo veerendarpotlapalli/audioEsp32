@@ -1,0 +1,9 @@
+
+    In this we are Streaming the audio using TCP (Transmission Control Protocol) IP,
+    where the mobile device will creates Hotspot and the pebbl device will connect
+    to that wifi where the pebbl device will get a IP address by sending that IP
+    address to the mobile device we can Stream the audio with in the web.
+
+    * But we are not using this method because :
+                        The Streaming is having the more Delay.
+                        And we are also unable to save the audio file.

@@ -1,0 +1,6 @@
+        In this method we used Bluetooth Classic for Smart configuaration.
+        it was deprecating soon.
+        So we are not using this method.
+        Instead of this we are using Bluitooth BLE for smart configuration.
+        i.e Connecting pebbl device to wifi network for data receiving and sending and
+        for websocket Connection.

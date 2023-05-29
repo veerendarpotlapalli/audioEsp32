@@ -1,7 +1,6 @@
 import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:webview_flutter/webview_flutter.dart';
 
 class httpWeb extends StatefulWidget {
   const httpWeb({Key? key}) : super(key: key);
@@ -21,6 +20,7 @@ class _httpWebState extends State<httpWeb> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
+
             ElevatedButton(
                 onPressed: (){
                   playAudio();
@@ -28,7 +28,7 @@ class _httpWebState extends State<httpWeb> {
                 child: Text("inApp PLAY")
             ),
 
-            SizedBox(height: 50,),
+            SizedBox(height: 40,),
 
             ElevatedButton(
                 onPressed: (){
@@ -45,24 +45,22 @@ class _httpWebState extends State<httpWeb> {
 
   playAudio () async {
 
+    /*   here the audio will play within the app with the help of Audio Player library
+         where the Audio Player method can able to Play the audio of url's
+         we are taking the TCP IP as a url and giving it to the Audio Player   */
+
     await audioPlayer.play(UrlSource('http://192.168.4.1/'));
 
   }
 
   urlAudio () async {
 
-    var url = Uri.parse('http://192.168.4.1/');
+    /*   Here we are giving the IP as the url to the URLlauncher so that it can
+         Launch the url where we can able to listen the audio which is coming
+         from the pebbl device   */
+
+      var url = Uri.parse('http://192.168.4.1/');
       await launchUrl (url);
-
-  }
-
-  ipWebView (){
-
-    return Scaffold(
-      body: WebViewWidget(controller: WebViewController()
-        ..loadRequest(Uri.parse('https://amazon.com')),
-      ),
-    );
 
   }
 

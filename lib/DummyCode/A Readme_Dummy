@@ -1,0 +1,23 @@
+        This Dummy code is having the Functionalities of
+                                                - Bluetooth device connectivity via phone Settings
+                                                - CheckSums
+
+                     -   Bluetooth device connectivity via phone Settings : is to connect to BLE devices
+                                                                going into the phone settings.
+                                                                But now we are able to connect to
+                                                                BLE devices from app itself
+                                                                [In app BLE  device connectivity]
+
+
+                     - CheckSums : CheckSums is to identify the corrupted data.
+                                   where firstly the peppl device sends 512 bytes of data simultaneously
+                                   then we recieve the
+                                   512 bytes of audio data and we will
+                                   stream the audio data,before we stream we will compare data send by
+                                   pebbl device and the data we recive whether they are correct or not.
+                                   if the data is correct we'll stream otherwise we'll again send it
+                                   back to pepple device to send the correct data again.
+
+
+                                   But we are not using this because Later we came to Know that the Streaming in TCP server has
+                                   the in-built feature of checksums.

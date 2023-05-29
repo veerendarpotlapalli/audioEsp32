@@ -1,0 +1,26 @@
+        This is the finalized method which we are using now for Streaming and saving audio files.
+
+
+
+
+                                                 main.dart
+                                                    |
+                                                    |
+                                                    |
+                    BluetoothBLE();  -->  To scan BLE devices and connecting to that specific Device
+                                                    |
+                                                    |
+                                                    |
+                    BLEConnection();  -->  we'll Scan available wifi devices and connecting the pebbl device to specific
+                                           wifi network by sending wifi name,password and IP Address[for websocket connection]
+                                           to pebbl device.
+                                           - we can also apply filters and volume adjustments.
+                                                    |
+                                                    |
+                                                    |
+                    WebSocketStreamSave();  -->   Here we can Start Streaming and also we able to save the
+                                                  Streaming audio as a file and play from the app itself from List.
+                                                  - we can also apply filters and volume adjustments.
+                                                  - dart files
+                                                        - Wav_Header();
+                                                        - File_Entity_List(); are used Here.
