@@ -32,8 +32,8 @@ class BLEConnection extends StatefulWidget {
 
 class _BLEConnectionState extends State<BLEConnection> {
 
-  List<String> wifiList=[];
-  TextEditingController password=TextEditingController();
+  List<String> wifiList=[];  // storing all the wifi networks in list type
+  TextEditingController password = TextEditingController();
   final String SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
   final String CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
   late String TARGET_DEVICE_NAME;
