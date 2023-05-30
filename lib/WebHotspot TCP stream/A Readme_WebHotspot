@@ -1,7 +1,7 @@
 
     In this we are Streaming the audio using TCP (Transmission Control Protocol) IP,
-    where the mobile device will creates Hotspot and the pebbl device will connect
-    to that wifi where the pebbl device will get a IP address by sending that IP
+    where the pebbl device will creates Hotspot and the mobile device will connect
+    to that wifi.where the pebbl device will get a IP address by sending that IP
     address to the mobile device we can Stream the audio with in the web.
 
     * But we are not using this method because :

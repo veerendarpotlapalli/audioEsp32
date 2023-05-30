@@ -1,3 +1,6 @@
+
+    // This class specify the audio properties in streaming or saving part
+
 import 'dart:convert';
 import 'dart:typed_data';
 

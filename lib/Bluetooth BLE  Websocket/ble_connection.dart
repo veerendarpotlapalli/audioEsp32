@@ -1,3 +1,12 @@
+
+
+         /*
+               Here we are getting wifi list from pebbl device and
+               making pebbl device to connect to the particular wifi network and
+               if pebbl device connected to wifi we will navigate to streaming Screen
+
+         */
+
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
@@ -23,23 +32,14 @@ class BLEConnection extends StatefulWidget {
 
 class _BLEConnectionState extends State<BLEConnection> {
 
-  bool isConnecting = true;
   List<String> wifiList=[];
-  bool isDisconnecting = false;
   TextEditingController password=TextEditingController();
   final String SERVICE_UUID = "4fafc201-1fb5-459e-8fcc-c5c9c331914b";
   final String CHARACTERISTIC_UUID = "beb5483e-36e1-4688-b7f5-ea07361b26a8";
   late String TARGET_DEVICE_NAME;
-  FlutterBluePlus  flutterBluePlus = FlutterBluePlus .instance;
-  late List<BluetoothDevice> pairedDevices = [];
-  late List<BluetoothDevice> connectedDevice = [];
   final info = NetworkInfo();
-  late String wifiName ;
-  String ch='';
-  String wifiConnection = "";
   var passcode = "";
   var ipAdd = '';
-  StreamSubscription<ScanResult>? scanSubscription;
   BluetoothDevice? targetDevice;
   BluetoothCharacteristic? targetCharacteristic;
   String connectionText = "";
@@ -50,6 +50,7 @@ class _BLEConnectionState extends State<BLEConnection> {
     connectToDevice();
   }
 
+  // connecting to the specific device which we onTap in previous screen
   connectToDevice() async {
 
     try{
@@ -86,6 +87,8 @@ class _BLEConnectionState extends State<BLEConnection> {
     // discoverServices();
   }
 
+
+  // getting / reciving data from pebbl device
 
   discoverServices() async {
     if (targetDevice == null) {
@@ -139,6 +142,7 @@ class _BLEConnectionState extends State<BLEConnection> {
 
   }
 
+  // sending data to pebbl device
   writeData(String data) async {
 
     if (targetCharacteristic == null) return;
@@ -202,6 +206,7 @@ class _BLEConnectionState extends State<BLEConnection> {
   }
 
 
+  // received data from pebbl device
   dataReceive(String data) async {
     setState(() {});
     print('^^^^^^^^^^^^^^^^^^^^^^^^^$data^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^');
@@ -324,6 +329,10 @@ class _BLEConnectionState extends State<BLEConnection> {
   }
 
 
+  /*
+     connecting to wifi network by sending wifi network name and password.
+     After wifi connected we are sending IP addres of mobile device
+  */
 
   ConnecttoWifiPopUp(int index){
 
@@ -427,6 +436,7 @@ class _BLEConnectionState extends State<BLEConnection> {
   }
 
 
+  // asking pebbl device to connect to the web socket
   showWebSocketConformation() {
     showCupertinoDialog<String>(
       context : context,

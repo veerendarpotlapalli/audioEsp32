@@ -34,54 +34,43 @@ dependencies:
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.2   # having default icons which we can use in our app
 
-  path_provider: ^2.0.13
-  intl: ^0.18.0
-  slide_popup_dialog_null_safety: ^1.0.0
-  flutter_svprogresshud: ^0.0.3
-  permission_handler: ^10.2.0
+  path_provider: ^2.0.13   # used to give and find path to files
+  intl: ^0.18.0   # internationalization is used for date/number formatting and parsing
+  slide_popup_dialog_null_safety: ^1.0.0     # for popups we are using this
+  flutter_svprogresshud: ^0.0.3   # it is a progress bar
+  permission_handler: ^10.2.0    # for asking run time permissions
 
-  flutter_sound: ^9.2.13
-  flutter_bluetooth_seria_changed: ^0.4.0
-  web_socket_channel: ^2.3.0
-  network_info_plus: ^3.0.2
-  showcaseview: ^2.0.3
-  fluttertoast: ^8.2.1
-  share_plus: ^7.0.1
-  file_picker: ^5.2.9
-  webview_flutter: ^4.0.7
-  url_launcher: ^6.1.10
-  binary_codec: ^2.0.3
-  crc32_checksum: ^0.0.2
+  flutter_sound: ^9.2.13   # this is the audio player and also a Stream player
+  flutter_bluetooth_seria_changed: ^0.4.0   # this is the BT Classic package for both mobile and pebbl device and communication
+  web_socket_channel: ^2.3.0   # for creating web Sockets
+  network_info_plus: ^3.0.2   # for getting the wifi network informations
+  showcaseview: ^2.0.3   # for overlay texts
+  fluttertoast: ^8.2.1   # for toast messages
+  share_plus: ^7.0.1    # used in sharing audio files
+  file_picker: ^5.2.9   # used to get files from phone storage etc...
+  webview_flutter: ^4.0.7    # it creates a in app webview using url
+  url_launcher: ^6.1.10    # to launch the url in browser
+  binary_codec: ^2.0.3    # used to convert one data types into binary type
+  crc32_checksum: ^0.0.2   # used in checksums
 
-  flutter_blue_plus: ^1.4.0
-  app_settings: ^4.2.0
-  get: ^4.6.5
-  animated_toggle_switch: ^0.6.2
-  toggle_switch: ^2.1.0
-  connectivity_plus: ^3.0.6
-  device_info_plus: ^9.0.1
-
-#  flutter_blue: ^0.8.0
-
-
-  audioplayers: ^4.0.1
-  just_audio: ^0.9.32
-  crypto: ^3.0.2
-
-  ffmpeg_kit_flutter: ^5.1.0
-#  flutter_ffmpeg: ^0.4.2
-
-  #  just_audio: ^0.9.31
-  #  flutter_bluetooth_serial: ^0.4.0
-  #  flutter_blue_plus: ^1.4.0
-  #  audio_waveforms: ^1.0.3
+  flutter_blue_plus: ^1.4.0   # it is a BLE package for communication and discovering devices and connecting
+  app_settings: ^4.2.0    # to open settings from app
+  get: ^4.6.5    # state management getx
+  animated_toggle_switch: ^0.6.2   # toggle switch for on/off purposes [animated]
+  toggle_switch: ^2.1.0    # toggle switch for on/off purposes
+  connectivity_plus: ^3.0.6    # To get the information about the device connections
+  device_info_plus: ^9.0.1    # to get the ip address and other info about phone
+  audioplayers: ^4.0.1  # used to play audio
+  just_audio: ^0.9.32    # # used to play audio
+  crypto: ^3.0.2    # To implement cryptographic functions like creating SHA
+  ffmpeg_kit_flutter: ^5.1.0   # used for streaming and saving audio through ffmpeg
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  change_app_package_name: ^1.1.0
+  change_app_package_name: ^1.1.0   # To change the package name of the app
 
 
   # The "flutter_lints" package below contains a set of recommended lints to

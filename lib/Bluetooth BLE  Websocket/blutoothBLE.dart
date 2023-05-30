@@ -1,11 +1,14 @@
+
+      /*    Here we Scan and get the available BLE devices
+
+            and by on tapping the specific device we will get
+            Connected to that device    */
+
 import 'dart:async';
-
-
 import 'package:flutter/material.dart';
 import 'package:flutter_blue_plus/flutter_blue_plus.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:network_info_plus/network_info_plus.dart';
-
 import 'ble_connection.dart';
 
 class BluetoothBLE extends StatefulWidget {
@@ -17,15 +20,11 @@ class BluetoothBLE extends StatefulWidget {
 
 class _BluetoothBLEState extends State<BluetoothBLE> {
 
-  TextEditingController password=TextEditingController();
   FlutterBluePlus  flutterBluePlus = FlutterBluePlus .instance;
-  late List<BluetoothDevice> pairedDevices = [];
-  late List<BluetoothDevice> connectedDevice = [];
-  late List<BluetoothDevice>  bluetoothList = [];
-  final info = NetworkInfo();
-  StreamSubscription<ScanResult>? scanSubscription;
-  String connectionText = "";
-  int mtuSize = 512;
+  late List<BluetoothDevice> pairedDevices = [];   // to get paired devices
+  late List<BluetoothDevice> connectedDevice = [];   // to get the connected devices
+  late List<BluetoothDevice>  bluetoothList = [];   // to get the list of BLE devices
+  int mtuSize = 512;   // to set the mtu size to recive and send large amount of data
   String device = "Get Devices";
 
   @override

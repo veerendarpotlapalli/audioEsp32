@@ -1,3 +1,6 @@
+
+        // Here we are creating websocket and Streaming and saving the audio via webSockets
+
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:flutter_sound/flutter_sound.dart';
@@ -23,16 +26,13 @@ class WebSocketStreamSave extends StatefulWidget {
 }
 
 class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
-  TextEditingController password=TextEditingController();
+  TextEditingController password = TextEditingController();
   late WebSocket webSocket;
-  bool isConnecting = true;
-  bool isDisconnecting = false;
   List<List<int>> chunks = <List<int>>[];
   int contentLength = 0;
   Uint8List? _bytes;
   RestartableTimer? _timer;
   DateFormat dateFormat = DateFormat("yyyy-MM-dd_HH_mm_ss");
-  Uint8List? dataStream;
   List<FileSystemEntity> files = <FileSystemEntity>[];
   String? selectedFilePath;
   final player = FlutterSoundPlayer(voiceProcessing: true);
@@ -41,6 +41,7 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
   String stopBtn = "Start";
 
 
+  // creating audio file
   _completeByte() async {
     if (chunks.isEmpty || contentLength == 0) return;
     SVProgressHUD.dismiss();
@@ -69,7 +70,7 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
     chunks.clear();
   }
 
-
+      // create webSocket channel
   void createChannel()async{
     password.text= (await info.getWifiIP())!;
     print(await info.getWifiIP());
@@ -104,6 +105,9 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
     }
 
   }
+
+
+    // initializing player for Streaming
   void initStreamPlayer()async{
     await streamPlayer.startPlayerFromStream(
         codec: Codec.pcm16,
@@ -114,6 +118,8 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
     streamPlayer.setSubscriptionDuration(Duration(milliseconds: 300));
     streamPlayer.setVolume(1.0);
   }
+
+    // it is the first method called itself when widget started
   @override
   void initState() {
     createChannel();
@@ -128,6 +134,7 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
   }
 
 
+    // executed when widget is Closed
   @override
   void dispose() {
     super.dispose();
@@ -286,17 +293,23 @@ class _WebSocketStreamSaveState extends State<WebSocketStreamSave> {
     );
   }
 
+
+  // giving path for file
   Future<String> get _localPath async {
     final directory = await getExternalStorageDirectory();
     return directory!.path;
   }
 
+
+  // creating file and giving initial name to file
   Future<File> get _makeNewFile async {
     final path = await _localPath;
     String newFileName = dateFormat.format(DateTime.now());
     return File('$path/$newFileName.wav');
   }
 
+
+  // getting files from path
   void _listofFiles() async {
     final path = await _localPath;
     var fileList = Directory(path).list();
